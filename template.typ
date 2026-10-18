@@ -29,6 +29,9 @@
 
   #show: show-theorion
 
+  // Complexity class configurations
+  #show sym.lt.eq: math.scripts
+
   #set-inherited-levels(1)
 
   #doc

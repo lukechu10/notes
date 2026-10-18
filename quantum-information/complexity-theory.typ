@@ -1,4 +1,5 @@
 #import "../template.typ": *
+#import "../complexity-classes.typ" as class
 
 #show: template
 
@@ -86,10 +87,114 @@ The existence of an _efficient_ universal Turing Machine is a fundamental result
   So in either case, we reach a contradiction. Therefore, no TM can compute $f$.
 ]
 
-#example[
+#example[The halting problem][
   A more natural example of an uncomputable function is the _halting problem_, which is the function $sans("HALT"): {0, 1}^* -> {0, 1}$ which returns 1 if the TM represented by the input string halts on that input, and returns 0 otherwise.
 
   If we had a TM $M_"Halt"$ that computes $sans("HALT")$, we could use it to compute the function $f$ defined in the proof of @thm:uncomputable-function, which is a contradiction. The idea is that we can use $M_"Halt"$ to first determine whether some TM $M_x$ halts on input $x$. If it does not halt, we can immediately return 0. If it does halt, we can simulate $M_x$ on input $x$ using the universal TM to determine what it returns.
 
   Therefore, the halting problem is uncomputable.
 ]
+
+== The complexity class $class.P$
+
+A common framework for studying the (time) complexity of problems is in terms of _languages_ and _decision problems_. A language $L$ is a subset of ${0, 1}^*$ and a decision problem is a problem that can be phrased as a question of whether a given string $x in {0, 1}^*$ belongs to some language $L$. Informally, we can think of decision problems as yes/no questions about strings.
+
+We say that a TM $M$ _decides_ a language $L$ if $M$ computes $f_L: {0, 1}^* -> {0, 1}$ where $f(x) = 1 <=> x in L$. $f_L$ is also called the _characteristic function_ of $L$.
+
+#definition[The class $sans("DTIME")$][
+  Let $T: NN -> NN$ be a function. We define the complexity class $class.DTIME(T(n))$ as the set of languages $L$ such that there exists a TM $M$ that decides $L$ and runs in time $c T(n)$ for some positive constant $c$.
+]<def:DTIME>
+
+The D in the name $sans("DTIME")$ stands for "deterministic" since we are considering deterministic Turing Machines. We can also define the class $class.NTIME(T(n))$ in a similar way, but using non-deterministic Turing Machines instead.
+
+Now we can try to define what we mean by "efficiently solvable" problems. A common definition is that a problem is efficiently solvable if it can be solved in polynomial time. This leads us to the following definition.
+
+#definition[The class $class.P$][
+  $class.P = union_(c in NN) class.DTIME(n^c)$.
+]<def:P>
+
+We say that some decision problems has an efficient algorithm if it is in $class.P$.
+
+#remark[
+  The definition of $class.P$ seems to depend on the choice of the model of computation (e.g. Turing Machines, RAM machines, etc.). However as we claimed earlier, any physically realisable model of computation can be simulated by a Turing Machine with at most a polynomial slowdown. Therefore, the definition of $class.P$ is robust to the choice of model of computation.
+]
+
+== The complexity class $class.NP$
+
+Informally, the class $class.NP$ represents problems whose solutions can be _verified_ in polynomial time.
+
+#definition[The class $class.NP$][
+  A language $L$ is in $class.NP$ if there exists a polynomial $p(n)$ and a polynomial-time TM $M$ such that $forall x in {0, 1}^*$, $x in L$ iff $exists u in {0, 1}^p(|x|)$ such that $M(x, u) = 1$. If there exists a string $u$ such that $M(x, u) = 1$, then $u$ is called a _certificate_ of $x$. $M$ is called the _verifier_ of $L$.
+]<def:NP>
+
+#remark[
+  The definition of $class.NP$ can be equivalently phrased in terms of non-deterministic Turing Machines. In particular, we can start by defining the class $class.NTIME(T(n))$ like we did for $class.DTIME(T(n))$, but using non-deterministic Turing Machines instead. Then we can define $class.NP = union_(c in NN) class.NTIME(n^c)$.
+]
+
+#remark[
+  Clearly we have $class.P subset.eq class.NP$ since the certificate $u$ can be the empty string. However, it is an open question whether $class.P = class.NP$ or if $class.P$ is a strict subset of $class.NP$.
+]
+
+#example[
+  TODO: Give some examples of problems in $class.NP$.
+]
+
+=== $class.NP$-completeness
+
+Some problems in $class.NP$ have the fascinating property that if there were an efficient algorithm for them, then there would be an efficient algorithm for _every_ problem in $class.NP$. These problems can be thought of as the "hardest" problems in $class.NP$ and are called $class.NPhard$.
+
+If furthermore this problem is also in $class.NP$, then it is called $class.NPcomplete$. In other words, $class.NPcomplete = class.NP inter class.NPhard$.
+
+To make this more precise, we need to define what it means for one problem to be "at least as hard" as another problem. We do this using the notion of polynomial-time reductions.
+
+#definition[Polynomial-time reductions, $class.NP$-hardness][
+  Let $L_1, L_2 subset.eq {0, 1}^*$ be two languages. We say that $L_1$ is _polynomial-time reducible_ to $L_2$, denoted $L_1 <=_p L_2$, if there exists a polynomial-time computable function $f: {0, 1}^* -> {0, 1}^*$ such that for every $x in {0, 1}^*$, $x in L_1$ iff $f(x) in L_2$. The function $f$ is called a _reduction_ from $L_1$ to $L_2$.
+
+  We say that $L in class.NPhard$ if $forall L' in class.NP, L' <=_p L$.
+]<def:poly-reduction>
+
+#lemma[
+  If $L_1 <=_p L_2$ and $L_2 in class.P$, then $L_1 in class.P$. In other words, $class.P$ is closed under polynomial-time reductions.
+]
+
+#proof[
+  We can construct a polynomial-time algorithm for $L_1$ as follows. Given an input $x$, we first compute $f(x)$ in polynomial time, and then run the polynomial-time algorithm for $L_2$ on input $f(x)$. The input to the algorithm for $L_2$ has size at most polynomial in the size of $x$, so the overall running time is polynomial in the size of $x$. Therefore, $L_1 in class.P$.
+]
+
+Similarly, we can easily show that if $L_1 <=_p L_2$ and $L_2 in class.NP$, then $L_1 in class.NP$. In other words, $class.NP$ is also closed under polynomial-time reductions.
+
+#remark[
+  We cannot use polynomial-time reductions to classify problems _within_ $class.P$, such as for defining a notion of $class.P$-completeness. This is because polynomial-time reductions have the same power as the class $class.P$ itself. In particular, if we define $class.P$-hardness using polynomial-time reductions, then almost every problem in $class.P$ would be $class.P$-hard, since we can solve the problem outright in the reduction itself.
+
+  To create a theory about the internal structure of $class.P$, we need to use a more restrictive notion of reductions, such as log-space reductions.
+]
+
+#example[
+  Some examples of $class.NPcomplete$ problems include:
+  - The Boolean satisfiability problem (SAT): given a boolean formula, determine if there exists an assignment of truth values to the variables that make the formula evaluate to true (@thm:Cook-Levin).
+  - The Hamiltonian cycle problem: given a graph, determine if there exists a cycle that visits every vertex exactly once.
+  - The clique problem: given a graph and an integer $k$, determine if there exists a complete subgraph (clique) of size $k$.
+]
+
+#theorem[Cook-Levin theorem][
+  The Boolean satisfiability problem (SAT) is $class.NPcomplete$.
+]<thm:Cook-Levin>
+
+#proof[
+  TODO
+]
+
+#emph-block[
+  *Summary*:
+  - The notion of _computability_ is formalised using Turing Machines. Not all functions are computable, and the halting problem is a canonical example of an uncomputable function.
+  - We often work in the framework of _decision problems_ and _languages_. These decision problems can be classified into _complexity classes_, based on the resources required to solve them. The most fundamental complexity classes are $class.P$ and $class.NP$ which represent problems that can be solved in polynomial time and problems whose solutions can be verified in polynomial time, respectively. The question of whether $class.P = class.NP$ is one of the most important open questions in computer science.
+  - Some problems in $class.NP$ are $class.NPhard$, meaning that they are the "hardest" problems in $class.NP$. If any $class.NPhard$ problem can be solved in polynomial time, then every problem in $class.NP$ can be solved in polynomial time. The class $class.NPcomplete$ is the intersection of $class.NP$ and $class.NPhard$.
+  - $class.NP = class.P$ iff there exists a $class.NPcomplete$ problem that is in $class.P$.
+  - The Cook-Levin theorem shows that the Boolean satisfiability problem (SAT) is $class.NPcomplete$.
+]
+
+= Randomized Algorithms
+
+= Quantum Computation
+
+= Average Case Complexity
