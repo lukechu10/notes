@@ -1,5 +1,6 @@
 #import "@preview/theorion:0.6.0": *
-#import cosmos.simple: *
+#import "@preview/hydra:0.6.3": hydra
+#import cosmos.clouds: *
 
 #let template(doc) = [
   #set text(
@@ -9,9 +10,26 @@
   #set par(
     justify: true,
     leading: 0.8em,
+    spacing: 1.5em,
+  )
+  #set heading(numbering: "1.1.1")
+  #set page(
+    paper: "a4",
+    margin: 1in,
+    numbering: "1",
+    header: context {
+      if counter(page).get().first() > 1 {
+        [
+          _#align(left, hydra(1))_
+          #line(length: 100%, stroke: 0.5pt)
+        ]
+      }
+    },
   )
 
   #show: show-theorion
+
+  #set-inherited-levels(1)
 
   #doc
 ]
