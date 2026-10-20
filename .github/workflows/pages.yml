@@ -1,0 +1,94 @@
+name: Build and deploy lecture notes
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Typst
+        uses: typst-community/setup-typst@v4
+
+      - name: Compile top-level Typst notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p site
+          shopt -s nullglob
+          typst_files=(./*.typ)
+          if (( ${#typst_files[@]} == 0 )); then
+            echo "No top-level .typ files found" >&2
+            exit 1
+          fi
+          for source in "${typst_files[@]}"; do
+            name="$(basename "${source%.typ}")"
+            typst compile "$source" "site/${name}.pdf"
+          done
+
+      - name: Build PDF index
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          pdfs=(site/*.pdf)
+          {
+            cat <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Lecture Notes</title>
+          </head>
+          <body>
+            <main>
+              <h1>Lecture Notes</h1>
+              <ul>
+          HTML
+            for pdf in "${pdfs[@]}"; do
+              filename="${pdf##*/}"
+              printf '        <li><a href="%s">%s</a></li>\n' "$filename" "$filename"
+            done
+            cat <<'HTML'
+              </ul>
+            </main>
+          </body>
+          </html>
+          HTML
+          } > site/index.html
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
