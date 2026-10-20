@@ -1,5 +1,5 @@
-#import "../template.typ": *
-#import "../complexity-classes.typ" as class
+#import "utils/template.typ": *
+#import "utils/complexity-classes.typ" as class
 
 #show: template
 
