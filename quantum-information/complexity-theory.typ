@@ -184,6 +184,15 @@ Similarly, we can easily show that if $L_1 <=_p L_2$ and $L_2 in class.NP$, then
   TODO
 ]
 
+== The complexity class $class.coNP$
+
+Given some language $L subset.eq {0, 1}^*$, we can define its complement language $overline(L) = {0, 1}^* \\ L$.
+
+This allows us to define the complexity class $class.coNP$ as follows.
+$ class.coNP = { L subset.eq {0, 1}^* | overline(L) in class.NP }. $
+
+
+
 #emph-block[
   *Summary*:
   - The notion of _computability_ is formalised using Turing Machines. Not all functions are computable, and the halting problem is a canonical example of an uncomputable function.
@@ -192,6 +201,8 @@ Similarly, we can easily show that if $L_1 <=_p L_2$ and $L_2 in class.NP$, then
   - $class.NP = class.P$ iff there exists a $class.NPcomplete$ problem that is in $class.P$.
   - The Cook-Levin theorem shows that the Boolean satisfiability problem (SAT) is $class.NPcomplete$.
 ]
+
+= The Polynomial Hierarchy
 
 = Randomized Algorithms
 
