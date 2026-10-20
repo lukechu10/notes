@@ -27,6 +27,9 @@
     },
   )
 
+  #show outline.entry.where(level: 1): strong
+  #show outline.entry.where(level: 1): set outline.entry(fill: [])
+
   #show: show-theorion
 
   // Complexity class configurations
