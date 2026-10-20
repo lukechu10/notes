@@ -2,6 +2,7 @@
 
 #let DTIME = t => $sans("DTIME")(#t)$
 #let NTIME = t => $sans("NTIME")(#t)$
+#let ATIME = t => $sans("ATIME")(#t)$
 
 #let P = math.sans("P")
 #let NP = math.sans("NP")
@@ -22,6 +23,7 @@
 #let AM = math.sans("AM")
 
 #let PH = math.sans("PH")
+#let AP = math.sans("AP")
 
 #let BQP = math.sans("BQP")
 #let QMA = math.sans("QMA")

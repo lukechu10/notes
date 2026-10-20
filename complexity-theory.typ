@@ -88,14 +88,14 @@ The existence of an _efficient_ universal Turing Machine is a fundamental result
 ]
 
 #example[The halting problem][
-  A more natural example of an uncomputable function is the _halting problem_, which is the function $sans("HALT"): {0, 1}^* -> {0, 1}$ which returns 1 if the TM represented by the input string halts on that input, and returns 0 otherwise.
+  A more natural example of an uncomputable function is the _halting problem_, which is the function $"HALT": {0, 1}^* -> {0, 1}$ which returns 1 if the TM represented by the input string halts on that input, and returns 0 otherwise.
 
-  If we had a TM $M_"Halt"$ that computes $sans("HALT")$, we could use it to compute the function $f$ defined in the proof of @thm:uncomputable-function, which is a contradiction. The idea is that we can use $M_"Halt"$ to first determine whether some TM $M_x$ halts on input $x$. If it does not halt, we can immediately return 0. If it does halt, we can simulate $M_x$ on input $x$ using the universal TM to determine what it returns.
+  If we had a TM $M_"Halt"$ that computes $"HALT"$, we could use it to compute the function $f$ defined in the proof of @thm:uncomputable-function, which is a contradiction. The idea is that we can use $M_"Halt"$ to first determine whether some TM $M_x$ halts on input $x$. If it does not halt, we can immediately return 0. If it does halt, we can simulate $M_x$ on input $x$ using the universal TM to determine what it returns.
 
   Therefore, the halting problem is uncomputable.
 ]
 
-== The complexity class $class.P$
+== The Complexity Class $class.P$
 
 A common framework for studying the (time) complexity of problems is in terms of _languages_ and _decision problems_. A language $L$ is a subset of ${0, 1}^*$ and a decision problem is a problem that can be phrased as a question of whether a given string $x in {0, 1}^*$ belongs to some language $L$. Informally, we can think of decision problems as yes/no questions about strings.
 
@@ -119,7 +119,7 @@ We say that some decision problems has an efficient algorithm if it is in $class
   The definition of $class.P$ seems to depend on the choice of the model of computation (e.g. Turing Machines, RAM machines, etc.). However as we claimed earlier, any physically realisable model of computation can be simulated by a Turing Machine with at most a polynomial slowdown. Therefore, the definition of $class.P$ is robust to the choice of model of computation.
 ]
 
-== The complexity class $class.NP$
+== The Complexity Class $class.NP$
 
 Informally, the class $class.NP$ represents problems whose solutions can be _verified_ in polynomial time.
 
@@ -184,14 +184,20 @@ Similarly, we can easily show that if $L_1 <=_p L_2$ and $L_2 in class.NP$, then
   TODO
 ]
 
-== The complexity class $class.coNP$
+== The Complexity Class $class.coNP$
 
 Given some language $L subset.eq {0, 1}^*$, we can define its complement language $overline(L) = {0, 1}^* \\ L$.
 
 This allows us to define the complexity class $class.coNP$ as follows.
 $ class.coNP = { L subset.eq {0, 1}^* | overline(L) in class.NP }. $
 
+Similarly to how we defined $class.NP$ in terms of certificates and verifiers, we can do the same for $class.coNP$.
 
+#definition[The class $class.coNP$][
+  A language $L$ is in $class.coNP$ if there exists a polynomial $p(n)$ and a polynomial-time TM $M$ such that $forall x in {0, 1}^*, x in L$ iff $forall u in {0, 1}^p(|x|)$ such that $M(x, u) = 1$.
+]
+
+TODO: finish section on $class.coNP$.
 
 #emph-block[
   *Summary*:
@@ -203,6 +209,130 @@ $ class.coNP = { L subset.eq {0, 1}^* | overline(L) in class.NP }. $
 ]
 
 = The Polynomial Hierarchy
+
+The _polynomial hierarchy_, or $class.PH$, is a hierarchy of complexity classes that generalizes the classes $class.P$, $class.NP$, and $class.coNP$. One way to define the polynomial hierarchy is using alternating quantifiers.
+
+== The Complexity Class $Sigma_2^P$
+
+To motivate the study of $class.PH$, consider the following problem. We know that the problem of determining whether a graph $G$ has an independent set of size $k$ is in $class.NP$.
+
+$ "INDSET" = { (G, k) | G "has an independent set of size" >= k }. $
+
+This problem is in $class.NP$ because we can clearly verify a certificate (the independent set) in polynomial time. However, consider now the "exact independent set" problem:
+
+$ "EXACT-INDSET" = { (G, k) | G "has an independent set of exactly size" k }. $
+
+Here it doesn't seem like we can verify a certificate in polynomial time. In particular, we need to verify that there _exists_ an independent set of size $k$, and that _for all_ independent sets, they are at most of size $k$.
+
+To capture this kind of problem, we introduce the class $Sigma_2^P$.
+
+#definition[The class $Sigma_2^P$][
+  A language $L$ is in $Sigma_2^P$ if there exists a polynomial $p(n)$ and a polynomial-time TM $M$ such that
+
+  $
+    forall x in {0, 1}^*, med x in L "iff" exists u in {0, 1}^p(|x|) med forall v in {0, 1}^p(|x|) "such that" M(x, u, v) = 1.
+  $
+]<def:sigma-2-P>
+
+#remark[
+  $Sigma_2^P$ clearly contains both $class.NP$ and $class.coNP$ since we can construct $M$ to ignore either $u$ or $v$.
+]
+
+#example[
+  The "exact independent set" problem described above is in $Sigma_2^P$ since we can take $u$ to be a independent set of size $k$, and $v$ to be any independent set. The verifier $M$ can then check that $u$ is indeed an independent set of size $k$ and that $v$ is not an independent set of size greater than $k$.
+]
+
+== The Polynomial Hierarchy
+
+To define the polynomial hierarchy, we can define a sequence of classes $Sigma_k^P$ and $Pi_k^P$ for $k >= 0$ as follows:
+
+#definition[The classes $Sigma_k^P$ and $Pi_k^P$][
+  - $Sigma_0^P = Pi_0^P = class.P$.
+  - For $k >= 1$, a language $L$ is in $Sigma_k^P$ if there exists a polynomial $p(n)$ and a polynomial-time TM $M$ such that $forall x in {0, 1}^*$,
+    $
+      x in L "iff" exists u_1 in {0, 1}^p(|x|) med forall u_2 in {0, 1}^p(|x|) med ... med Q_k u_k in {0, 1}^p(|x|) med M(x, u_1, ..., u_k) = 1,
+    $
+    where $Q_k$ is an existential quantifier if $k$ is odd and a universal quantifier if $k$ is even.
+  - For $k >= 1$, a language $L$ is in $Pi_k^P$ if there exists a polynomial $p(n)$ and a polynomial-time TM $M$ such that $forall x in {0, 1}^*$,
+    $
+      x in L "iff" forall u_1 in {0, 1}^p(|x|) med exists u_2 in {0, 1}^p(|x|) med ... med Q_k u_k in {0, 1}^p(|x|) med M(x, u_1, ..., u_k) = 1,
+    $
+    where $Q_k$ is an existential quantifier if $k$ is even and a universal quantifier if $k$ is odd.
+]
+
+Note that $Sigma_1^P = class.NP$ and $Pi_1^P = class.coNP$.
+
+We are now ready to define the polynomial hierarchy.
+
+#definition[The polynomial hierarchy $class.PH$][
+  $class.PH = union.big_(k >= 0) Sigma_k^P$.
+]
+
+#lemma[
+  $class.PH = union.big_(k >= 0) Pi_k^P$.
+]
+#proof[
+  This follows from the fact that $Sigma_k^P subset.eq Pi_(k+1)^P subset.eq Sigma_(k+2)^P$.
+]
+
+== Properties of the Polynomial Hierarchy
+
+We believe that $class.NP != class.coNP$. We can generalize this to the conjecture that $Sigma_k^P != Sigma_(k+1)^P$ for all $k >= 1$. This is often stated as _the polynomial hierarchy does not collapse_.
+
+If for some $k$, $Sigma_k^P = Sigma_(k+1)^P$, then we say that _the polynomial hierarchy collapses to the $k$-th level_. This also implies that $class.PH = Sigma_k^P = union.big_(k >= 0) Sigma_k^P$.
+
+#theorem[
+  - For every $k$, if $Sigma_k^P = Pi_k^P$, then $class.PH = Sigma_k^P$, i.e. the polynomial hierarchy collapses to the $k$-th level.
+  - If $class.P = class.NP$, then $class.P = class.PH$, i.e. the polynomial hierarchy collapses to $class.P$.
+]
+
+#proof[
+  TODO
+]
+
+Every level $Sigma_k^P$ and $Pi_k^P$ have complete problems. However, $class.PH$ itself does not have any complete problems unless the polynomial hierarchy collapses.
+
+#property[
+  If there exists a language $L$ that is $class.PH$-complete, then the polynomial hierarchy collapses to some level $k$.
+]
+#proof[
+  If $L in class.PH$ is $class.PH$-complete, then $L in Sigma_k^P$ for some finite $k$. But by definition of $class.PH$-completeness, all languages in $class.PH$ are polynomial-time reducible to $L$. Therefore every language $L' in class.PH$ is in $Sigma_k^P$, which implies that $class.PH$ collapses to the $k$-th level.
+]
+
+#property[
+  $class.PH subset.eq class.PSPACE$.
+]
+
+#corollary[
+  $class.PH != class.PSPACE$ unless the polynomial hierarchy collapses to some level $k$.
+]
+
+#proof[
+  $class.PSPACE$ has complete problems, but $class.PH$ does not have any complete problems unless it collapses to some level $k$.
+]
+
+#remark[
+  Similar to non-deterministic Turing Machines, we can also define _alternating Turing Machines_, or ATMs which can be used to model the polynomial hierarchy.
+
+  Recall that a non-deterministic Turing Machine accepts if there exists some sequence of non-deterministic choices that leads to acceptance. An alternating Turing Machine generalizes this by allowing both existential and universal states. Each state of the ATM is labeled as either existential or universal. The ATM accepts if there exists a sequence of choices that leads to acceptance, where the choices at existential states are existentially quantified and the choices at universal states are universally quantified.
+
+  We can then define $class.PH$ in terms of ATMs who only have a fixed number of alternations between existential and universal states.
+
+  We can also define classes such as $class.ATIME(T(n))$ and $class.AP = union_(c in NN) class.ATIME(n^c)$. In particular, these classes allow unbounded number of alternations between existential and universal quantifiers. We can show that $class.AP = class.PSPACE$.
+]
+
+#remark[
+  Finally, it should be noted that the polynomial hierarchy can also be defined in terms of oracle Turing Machines. In particular, we have $Sigma_k^P = class.NP^(Sigma_(k-1)^P)$, and $Pi_k^P = class.coNP^(Sigma(k-1)^P)$.
+]
+
+#emph-block[
+  *Summary*:
+  - The polynomial hierarchy $class.PH$ is a hierarchy of complexity classes that generalizes $class.P$, $class.NP$, and $class.coNP$. It is defined using alternating quantifiers, and can also be defined in terms of alternating Turing Machines.
+  - The polynomial hierarchy is believed to not collapse, i.e. $Sigma_k^P != Sigma_(k+1)^P$ for all $k >= 1$. If it does collapse, then it collapses to some level $k$.
+  - Every level of the polynomial hierarchy has complete problems, but the polynomial hierarchy itself does not have any complete problems unless it collapses to some level $k$.
+]
+
+= Boolean Circuits
 
 = Randomized Algorithms
 
