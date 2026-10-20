@@ -220,7 +220,7 @@ $ "INDSET" = { (G, k) | G "has an independent set of size" >= k }. $
 
 This problem is in $class.NP$ because we can clearly verify a certificate (the independent set) in polynomial time. However, consider now the "exact independent set" problem:
 
-$ "EXACT-INDSET" = { (G, k) | G "has an independent set of exactly size" k }. $
+$ "EXACT-INDSET" = { (G, k) | "The maximum independent set of" G "is of size" k }. $
 
 Here it doesn't seem like we can verify a certificate in polynomial time. In particular, we need to verify that there _exists_ an independent set of size $k$, and that _for all_ independent sets, they are at most of size $k$.
 
@@ -335,6 +335,8 @@ Every level $Sigma_k^P$ and $Pi_k^P$ have complete problems. However, $class.PH$
 = Boolean Circuits
 
 = Randomized Algorithms
+
+We would like to investigate the power of Turing Machines that are allowed to make random coin tosses.
 
 = Quantum Computation
 
