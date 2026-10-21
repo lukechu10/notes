@@ -30,3 +30,7 @@
 #let QIP = math.sans("QIP")
 #let EQP = math.sans("EQP")
 #let NQP = math.sans("NQP")
+
+#let AvgP = math.sans("AvgP")
+#let AvgBPP = math.sans("AvgBPP")
+#let distNP = math.sans("distNP")

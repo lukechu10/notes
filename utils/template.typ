@@ -31,11 +31,12 @@
   #show outline.entry.where(level: 1): set outline.entry(fill: [])
 
   #show: show-theorion
+  #set-inherited-levels(1)
 
   // Complexity class configurations
   #show sym.lt.eq: math.scripts
 
-  #set-inherited-levels(1)
+  #set cite(style: "alphanumeric")
 
   #doc
 ]

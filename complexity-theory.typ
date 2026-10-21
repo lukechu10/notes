@@ -9,9 +9,11 @@
 )
 #title()
 
-_Last updated: #datetime.today().display()_
+_Luke Chu #h(3em) Last updated: #datetime.today().display()_
 
-These notes are primarily based on the book _Computational Complexity: A Modern Approach_ by Sanjeev Arora and Boaz Barak.
+These notes cover the basics of complexity theory, building up to the theory of average-case complexity, and in particular, to the theory of quantum average-case complexity.
+The sections on basic complexity classes, the polynomial hierarchy, and boolean circuits are based on the book _Computational Complexity: A Modern Approach_ by Sanjeev Arora and Boaz Barak @Arora_Barak_2009.
+The section on average case complexity is primarily based on _Average-Case Complexity_ by Andrej Bogdanov and Luca Trevisan @Bogdanov_Trevisan_2021.
 
 #outline()
 
@@ -340,4 +342,84 @@ We would like to investigate the power of Turing Machines that are allowed to ma
 
 = Quantum Computation
 
+== The Quantum Turing Machine Model
+
+== The Quantum Circuit Model
+
+== Grover's Search Algorithm
+
+== Simon's Algorithm
+
+== Shor's Algorithm
+
 = Average Case Complexity
+
+== Distributional Problems
+
+== Average Polynomial Time
+
+=== The Complexity Class $class.AvgP$
+
+A naive way to define average polynomial time is to say that a distributional problem $(L, D)$ is average polynomial-time solvable if the _expected running time_ of the algorithm $A$ is polynomial in the size of the input. That is, if $A$ satisfies the following condition.
+$ EE_(x tilde D_n)[t(x)] = "poly"(n). $
+
+However, this definition is not closed under polynomial-time reductions. Consider the following example. Let $(L, D)$ be a distributional problem that can be solved by some algorithm $A$ in polynomial time for $2^(n-1)$ of the inputs of length $n$, but takes exponential time $2^n$ for the remaining $2^n - 2^(n-1)$ inputs.
+
+TODO: complete section
+
+We can also define the notion of average polynomial time using _errorless heuristic schemes_.
+
+#definition[Errorless heuristic scheme, the class $class.AvgP$][
+  An _errorless heuristic scheme_ for a distributional problem $(L, D)$ is an algorithm $A(x, delta)$ that takes as input an instance $x$ and a parameter $delta in (0, 1)$, and outputs either $L(x)$ or a special symbol $bot$ indicating that it failed to solve the problem. The algorithm is allowed to fail with probability at most $delta$ over the choice of $x$ from the distribution $D_n$, where $n = |x|$.
+
+  In particular, we say that a distributional problem $(L, D)$ is polynomial-time solvable on average if there exists an algorithm $A(x, delta)$ such that:
+  - (Effectiveness) $A(x, delta)$ runs in time $"poly"(x/delta)$.
+  - (Correctness) $forall x, A(x, delta) in {L(x), bot}$.
+  - (Usefullness) $Pr_(x tilde D_n)(A(x, delta) = bot) < delta$
+
+  Such a problem is said to be in the class $class.AvgP$.
+
+]
+
+=== The Complexity Class $class.AvgBPP$
+
+We can relax the condition that the algorithm $A$ is errorless, and allow it to make bounded errors. This gives us the class $class.AvgBPP$.
+
+#definition[The class $class.AvgBPP$][
+  A distributional problem $(L, D)$ is in $class.AvgBPP$ if there exists a randomized algorithm $A(x, delta)$ such that:
+  - (Effectiveness) $A(x, delta)$ runs in time $"poly"(x/delta)$.
+  - (Correctness) $forall x, Pr(A(x, delta) in.not {L(x), bot}) <= 1/4$.
+  - (Usefullness) $Pr_(x tilde D_n)(Pr_A (A(x, delta) = bot) >= 1/4) < delta$.
+  For the final condition, note that the outer probability is over the choice of $x$ from the distribution $D_n$, while the inner probability is over the internal coin tosses of the algorithm $A$.
+]
+
+=== The Complexity Class $class.distNP$
+
+== A Complete Problem for $class.distNP$
+
+== A Complete Problem for $class.AvgBPP$
+
+There is currently no known complete problem for $class.BPP$ (although of course if $class.P = class.BPP$, then every $class.P$-complete problem is also $class.BPP$-complete). So somewhat surprisingly, we do know of a complete problem for the distributional class $class.AvgBPP$, due to @Itsykson_2010.
+
+Recall that the main obstacle to finding a complete problem for $class.BPP$ is the absence of an efficient enumeration of all bounded error probabilistic Turing Machines. One way around this is to consider promise-$class.BPP$ instead, for which a complete problem is known.
+
+We will now describe a complete distributional problem $(C, R)$ for $class.AvgBPP$.
+
+We start with a modification of the standard complete problem: $C$ consists of tuples $(M, x, 1^t)$ where $M$ is a probabilistic Turing Machine, $x$ is an input string, and $t$ is a time bound, such that $M$ accepts $x$ in time $t$ with probability at least $1/2$.
+
+= Quantum Average Case Complexity
+
+= Applications of Quantum Average Case Complexity
+
+== Random Hamiltonian Simulation
+
+#let bib = ```bib
+ @book{Arora_Barak_2009, title={Computational Complexity}, author={Arora, Sanjeev and Barak, Boaz}, language={en}, year={2009}, isbn={9780521424264} }
+
+ @article{Bogdanov_Trevisan_2021, title={Average-Case Complexity}, url={http://arxiv.org/abs/cs/0606037}, DOI={10.48550/arXiv.cs/0606037}, note={arXiv:cs/0606037}, number={arXiv:cs/0606037}, publisher={arXiv}, author={Bogdanov, Andrej and Trevisan, Luca}, year={2021}, month=aug, language={en} }
+
+ @article{Itsykson_2010, title={Structural complexity of AvgBPP}, volume={162}, ISSN={0168-0072}, DOI={10.1016/j.apal.2010.09.006}, number={3}, journal={Annals of Pure and Applied Logic}, author={Itsykson, Dmitry}, year={2010}, month=dec, pages={213–223} }
+
+```
+
+#bibliography(bytes(bib.text), full: true, style: "ieee")
