@@ -34,3 +34,6 @@
 #let AvgP = math.sans("AvgP")
 #let AvgBPP = math.sans("AvgBPP")
 #let distNP = math.sans("distNP")
+
+#let PSamp = math.sans("PSamp")
+#let PComp = math.sans("PComp")

@@ -360,7 +360,7 @@ We would like to investigate the power of Turing Machines that are allowed to ma
 
 === The Complexity Class $class.AvgP$
 
-A naive way to define average polynomial time is to say that a distributional problem $(L, D)$ is average polynomial-time solvable if the _expected running time_ of the algorithm $A$ is polynomial in the size of the input. That is, if $A$ satisfies the following condition.
+A naive way to define average polynomial time is to say that a distributional problem $(L, D)$ is average polynomial-time solvable if the _expected running time_ of the algorithm $A$ is polynomial in the size of the input. That is, if $A$ satisfies the following condition:
 $ EE_(x tilde D_n)[t(x)] = "poly"(n). $
 
 However, this definition is not closed under polynomial-time reductions. Consider the following example. Let $(L, D)$ be a distributional problem that can be solved by some algorithm $A$ in polynomial time for $2^(n-1)$ of the inputs of length $n$, but takes exponential time $2^n$ for the remaining $2^n - 2^(n-1)$ inputs.
@@ -391,6 +391,8 @@ We can relax the condition that the algorithm $A$ is errorless, and allow it to 
   - (Correctness) $forall x, Pr(A(x, delta) in.not {L(x), bot}) <= 1/4$.
   - (Usefullness) $Pr_(x tilde D_n)(Pr_A (A(x, delta) = bot) >= 1/4) < delta$.
   For the final condition, note that the outer probability is over the choice of $x$ from the distribution $D_n$, while the inner probability is over the internal coin tosses of $A$.
+
+  The algorithm $A$ is also called a _randomized errorless heuristic scheme_ for $(L, D)$. In this case, "errorless" refers to the proportion of inputs for which the algorithm fails (which can be made arbitrarily small), rather than the internal randomness of the algorithm.
 ]<def:AvgBPP>
 
 #remark[@Itsykson_2010][
@@ -415,21 +417,57 @@ We can relax the condition that the algorithm $A$ is errorless, and allow it to 
 
 === The Complexity Class $class.distNP$
 
+TODO: $class.distNP := (class.NP, class.PSamp)$.
+
 == A Complete Problem for $class.distNP$
+
+We introduce the _bounded halting problem_ which is complete for problems in $class.distNP$.
+
+$ "BH" = {(M, x, 1^t) | M "is a Turing Machine that accepts x in time" <= t}. $
+
+We pair this with the _approximately_ uniform distribution $U^"BH"$ and claim that the pair $("BH", U^"BH")$ is $class.distNP$-complete.
+
+TODO: precise statement and theorem.
+
+#proof[
+  TODO
+]
 
 == A Complete Problem for $class.AvgBPP$
 
-There is currently no known complete problem for $class.BPP$ (although of course if $class.P = class.BPP$, then every $class.P$-complete problem is also $class.BPP$-complete). So somewhat surprisingly, we do know of a complete problem for the distributional class $class.AvgBPP$, due to @Itsykson_2010.
+There is currently no known complete problem for $class.BPP$ (although of course if $class.P = class.BPP$, then every $class.P$-complete problem is also $class.BPP$-complete). So somewhat surprisingly, we do know of a complete problem for the distributional class $(class.AvgBPP, class.PSamp)$#footnote[The notation $(class.AvgBPP, class.PSamp)$ denotes the distributional complexity class containing all $(L, D)$ in $class.AvgBPP$ where $D in class.PSamp$.], due to @Itsykson_2010.
 
 Recall that the main obstacle to finding a complete problem for $class.BPP$ is the absence of an efficient enumeration of all bounded error probabilistic Turing Machines. One way around this is to consider promise-$class.BPP$ instead, for which a complete problem is known.
 
-We will now describe a complete distributional problem $(C, R)$ for $class.AvgBPP$.
+We will now describe a complete distributional problem $(C, R)$ for $(class.AvgBPP, class.PSamp)$.
 
-We start with a modification of the standard complete problem: $C$ consists of tuples $(M, x, 1^t)$ where $M$ is a probabilistic Turing Machine, $x$ is an input string, and $t$ is a time bound, such that $M$ accepts $x$ in time $t$ with probability at least $1/2$.
+Let $M^(<=m)$ denote the probabilistic Turing Machine $M$ that is restricted to run for at most $m$ steps. If $M$ has not halted after $m$ steps, it outputs the failure symbol $bot$.
+
+Let $"freq"(M(x))$ denote the most frequent output of $M$ on input $x$ over all possible internal coin tosses of $M$, and let $"prob"(M(x))$ be the probability of $"freq"(M(x))$.
+
+// We start with a modification of the standard complete problem: $C$ consists of tuples $(M, x, 1^t)$ where $M$ is a probabilistic Turing Machine, $x$ is an input string, and $t$ is a time bound, such that $M$ accepts $x$ in time $t$ with probability at least $1/2$.
+
+All strings in $C$ have the form $(M, y, 1^m, b, S, 1^s)$, where:
+- $M$ is a probabilistic Turing Machine,
+- $y$ is an input string to $M$,
+- $m$ is the maximum steps that $M$ can take, with $m > |y_0| + N_0$ for some sufficiently large constant $N_0$,
+- $b in {0, 1}$ is the answer that would be used instead of $bot$ for the machine $M^(<=m)$,
+- $S$ is the encoding of a sampler
+- $1^s$ is the maximum steps that $S$ can take.
+The language $C$ is defined by the following characteristic function:
+$
+  C(M, y, 1^m, b, S, 1^s) = cases(b &"if" quad Pr_M (M^(<=m)(y) = bot) >= 1/4",", "freq"(M^(<=m)(y)) quad &"otherwise.")
+$
+
+In particular, this defines a (deterministic) procedure that needs to check every possible sequence of coin tosses of $M^(<=m)$ to determine the most frequent output.
+
+The central idea in constructing the sampler $R$ is to assign to machines $M^(<=m)$ that do not have a clear majority answer a very small probability.
+This ensures that $C$, which is defined using expensive exhaustive computation, is efficient randomized on average.
+
 
 = Quantum Average Case Complexity
 
-= Applications of Quantum Average Case Complexity
+= Examples of Quantum Average Case Complexity
 
 == Random Hamiltonian Simulation
 
