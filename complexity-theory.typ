@@ -390,7 +390,27 @@ We can relax the condition that the algorithm $A$ is errorless, and allow it to 
   - (Effectiveness) $A(x, delta)$ runs in time $"poly"(x/delta)$.
   - (Correctness) $forall x, Pr(A(x, delta) in.not {L(x), bot}) <= 1/4$.
   - (Usefullness) $Pr_(x tilde D_n)(Pr_A (A(x, delta) = bot) >= 1/4) < delta$.
-  For the final condition, note that the outer probability is over the choice of $x$ from the distribution $D_n$, while the inner probability is over the internal coin tosses of the algorithm $A$.
+  For the final condition, note that the outer probability is over the choice of $x$ from the distribution $D_n$, while the inner probability is over the internal coin tosses of $A$.
+]<def:AvgBPP>
+
+#remark[@Itsykson_2010][
+  The constant $1/4$ in the correctness and usefullness conditions are arbitrary and can be replaced by anything in the interval $(2^(-Omega(n)), 1/2)$.
+
+  #proof[
+    Suppose $(L, D)$ is in $class.AvgBPP$ with an algorithm $A(x, delta)$ satisfying definition @def:AvgBPP. We can construct a new algorithm $B(x, delta)$ as follows: on input $x$, we run $A(x, delta)$ for $n=|x|$ number of times and return the most frequent answer among ${bot, 0, 1}$.
+
+    We now apply the Chernoff-Hoeffding bound which says that for $X_1, ... X_N$ independent and identically distributed random variables with $X_i in [0, 1]$ and $EE[X_i] = mu$, we have:
+    $ Pr(abs((sum_i X_i)/N - mu)) >= epsilon) <= 2 e^(-2 n epsilon^2). $
+
+    Applying this with $X_i tilde A(x, delta) = bot$, we get that if $Pr(A(x, delta) = bot) <= 1/4$ then $Pr(B(x, delta) = bot) = g(n)$, where $g(n) = 2^(-Omega(n))$ is some function.
+
+    Therefore, we have
+    $
+      Pr_(x tilde D_n)(Pr_B (B(x, delta) = bot) >= g(n)) <= Pr_(x tilde D_n)(Pr_A (A(x, delta) = bot) >= 1/4) < delta.
+    $
+
+
+  ]
 ]
 
 === The Complexity Class $class.distNP$
