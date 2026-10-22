@@ -284,7 +284,7 @@ We believe that $class.NP != class.coNP$. We can generalize this to the conjectu
 If for some $k$, $Sigma_k^P = Sigma_(k+1)^P$, then we say that _the polynomial hierarchy collapses to the $k$-th level_. This also implies that $class.PH = Sigma_k^P = union.big_(k >= 0) Sigma_k^P$.
 
 #theorem[
-  - For every $k$, if $Sigma_k^P = Pi_k^P$, then $class.PH = Sigma_k^P$, i.e. the polynomial hierarchy collapses to the $k$-th level.
+  - For every $k > 0$, if $Sigma_k^P = Pi_k^P$, then $class.PH = Sigma_k^P$, i.e. the polynomial hierarchy collapses to the $k$-th level.
   - If $class.P = class.NP$, then $class.P = class.PH$, i.e. the polynomial hierarchy collapses to $class.P$.
 ]
 
@@ -361,9 +361,45 @@ We would like to investigate the power of Turing Machines that are allowed to ma
 === The Complexity Class $class.AvgP$
 
 A naive way to define average polynomial time is to say that a distributional problem $(L, D)$ is average polynomial-time solvable if the _expected running time_ of the algorithm $A$ is polynomial in the size of the input. That is, if $A$ satisfies the following condition:
-$ EE_(x tilde D_n)[t(x)] = "poly"(n). $
+$ EE_(x tilde D_n)[t_A (x)] = "poly"(n). $
 
-However, this definition is not closed under polynomial-time reductions. Consider the following example. Let $(L, D)$ be a distributional problem that can be solved by some algorithm $A$ in polynomial time for $2^(n-1)$ of the inputs of length $n$, but takes exponential time $2^n$ for the remaining $2^n - 2^(n-1)$ inputs.
+However, this definition does not seem to properly capture the notion of "efficient on average". Consider the following example. Let $(L, D)$ be a distributional problem that can be solved by some algorithm $A$ in polynomial time for $1-2^(-n)$ of the inputs of length $n$, but takes exponential time $2^n$ for the remaining $2^(-n)$ inputs. This has expected running time:
+$
+  EE_(x tilde D_n)[t_A (x)] & = (1-2^(-n)) dot "poly"(n) + 2^(-n) dot 2^n \
+                            & = "poly"(n) + O(1).
+$
+
+Now consider some other algorithm $B$ that solves the same problem but is quadratically slower than $A$ on all inputs. That is, $t_B (x) = t_A (x)^2$. We would still expect $B$ to be considered average polynomial-time solvable, since it is only quadratically slower than $A$. However, the expected running time of $B$ is:
+$
+  EE_(x tilde D_n)[t_B (x)] = EE_(x tilde D_n)[t_A (x)^2] & = (1-2^(-n)) dot "poly"(n)^2 + 2^(-n) dot 2^(2n) \
+                                                          & = O(2^n).
+$
+So $B$ would not be considered average polynomial-time solvable under this definition.
+
+Instead, we can define average polynomial time in terms of a polynomial trade-off between the running time and fraction of inputs that the algorithm runs in polynomial time. This motivates the following definition of average polynomial time.
+
+#definition[Average polynomial time, trade-off definition][
+  An algorithm $A$ is said to run in _average polynomial time_ for a distribution $D$ if there exists some $epsilon > 0$ and some polynomial $p(n)$ such that for all $t$,
+  $ Pr_(x tilde D_n)[t_A (x) >= t] <= p(n)/t^epsilon. $
+]<def:avg-poly-time>
+
+#remark[
+  This definition bears strong resemblance to Markov's inequality, which states that for a non-negative random variable $X$ and any $a > 0$, we have
+  $ Pr(X >= a) <= EE[X]/a. $
+
+  TODO: reason out what the intuitive significance of this connection is.
+]
+
+#lemma[
+  An algorithm $A$ runs in average polynomial time (according to @def:avg-poly-time) iff it satisfies the following condition for some $epsilon > 0$:
+  $ EE_(x tilde D_n)[t_A (x)^epsilon] = O(n). $
+
+  Furthermore, $O(n)$ can be replaced by any polynomial in $n$.
+]
+
+#proof[]
+
+This provides an alternative definition of average polynomial time that is equivalent to @def:avg-poly-time.
 
 TODO: complete section
 
@@ -410,14 +446,12 @@ We can relax the condition that the algorithm $A$ is errorless, and allow it to 
     $
       Pr_(x tilde D_n)(Pr_B (B(x, delta) = bot) >= g(n)) <= Pr_(x tilde D_n)(Pr_A (A(x, delta) = bot) >= 1/4) < delta.
     $
-
-
   ]
 ]
 
 === The Complexity Class $class.distNP$
 
-TODO: $class.distNP := (class.NP, class.PSamp)$.
+TODO: $class.distNP := (class.NP, class.PComp)$.
 
 == A Complete Problem for $class.distNP$
 
@@ -432,6 +466,8 @@ TODO: precise statement and theorem.
 #proof[
   TODO
 ]
+
+== A Complete Problem for $(class.NP, class.PSamp)$
 
 == A Complete Problem for $class.AvgBPP$
 
@@ -463,6 +499,12 @@ In particular, this defines a (deterministic) procedure that needs to check ever
 
 The central idea in constructing the sampler $R$ is to assign to machines $M^(<=m)$ that do not have a clear majority answer a very small probability.
 This ensures that $C$, which is defined using expensive exhaustive computation, is efficient randomized on average.
+
+#emph-block[
+  *Summary*:
+  - Average case complexity is a framework for studying the complexity of problems under some distribution over the inputs. The central objects of study are _distributional problems_ $(L, D)$, where $L$ is a language and $D$ is an ensemble of distributions over the inputs.
+  - TODO: finish summary
+]
 
 
 = Quantum Average Case Complexity
