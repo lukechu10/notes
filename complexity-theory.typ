@@ -298,7 +298,7 @@ Every level $Sigma_k^P$ and $Pi_k^P$ have complete problems. However, $class.PH$
   If there exists a language $L$ that is $class.PH$-complete, then the polynomial hierarchy collapses to some level $k$.
 ]
 #proof[
-  If $L in class.PH$ is $class.PH$-complete, then $L in Sigma_k^P$ for some finite $k$. But by definition of $class.PH$-completeness, all languages in $class.PH$ are polynomial-time reducible to $L$. Therefore every language $L' in class.PH$ is in $Sigma_k^P$, which implies that $class.PH$ collapses to the $k$-th level.
+  If $L in class.PH$ is $class.PH$-complete, then $L in Sigma_k^P$ for some finite $k$. But by definition of $class.PH$-completeness, all languages in $class.PH$ are polynomial-time reducible to $L$. Therefore, every language $L' in class.PH$ is in $Sigma_k^P$, which implies that $class.PH$ collapses to the $k$-th level.
 ]
 
 #property[
@@ -316,7 +316,7 @@ Every level $Sigma_k^P$ and $Pi_k^P$ have complete problems. However, $class.PH$
 #remark[
   Similar to non-deterministic Turing Machines, we can also define _alternating Turing Machines_, or ATMs which can be used to model the polynomial hierarchy.
 
-  Recall that a non-deterministic Turing Machine accepts if there exists some sequence of non-deterministic choices that leads to acceptance. An alternating Turing Machine generalizes this by allowing both existential and universal states. Each state of the ATM is labeled as either existential or universal. The ATM accepts if there exists a sequence of choices that leads to acceptance, where the choices at existential states are existentially quantified and the choices at universal states are universally quantified.
+  Recall that a non-deterministic Turing Machine accepts if there exists some sequence of non-deterministic choices that leads to acceptance. An alternating Turing Machine generalizes this by allowing both existential and universal states. Each state of the ATM is labelled as either existential or universal. The ATM accepts if there exists a sequence of choices that leads to acceptance, where the choices at existential states are existentially quantified and the choices at universal states are universally quantified.
 
   We can then define $class.PH$ in terms of ATMs who only have a fixed number of alternations between existential and universal states.
 
@@ -397,7 +397,7 @@ Instead, we can define average polynomial time in terms of a polynomial trade-of
   Furthermore, $O(n)$ can be replaced by any polynomial in $n$.
 ]
 
-#proof[]
+#proof[TODO]
 
 This provides an alternative definition of average polynomial time that is equivalent to @def:avg-poly-time.
 
