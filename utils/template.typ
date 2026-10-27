@@ -2,6 +2,21 @@
 #import "@preview/hydra:0.6.3": hydra
 #import cosmos.clouds: *
 
+// Custom Theorion environments
+#let (algorithm-counter, algorithm-box, algorithm, show-algorithm) = make-frame(
+  "algorithm",
+  "Algorithm",
+  counter: theorem-counter,
+  inherited-levels: 2,
+  inherited-from: heading,
+  render: (prefix: none, title: "", full-title: auto, body) => [#box(
+    stroke: 1pt,
+    inset: 1em,
+  )[#strong[#full-title.]#sym.space#emph(
+      body,
+    )]],
+)
+
 #let template(doc) = [
   #set text(
     font: "New Computer Modern",
@@ -31,6 +46,7 @@
   #show outline.entry.where(level: 1): set outline.entry(fill: [])
 
   #show: show-theorion
+  #show: show-algorithm
   #set-inherited-levels(1)
 
   // Complexity class configurations
@@ -40,3 +56,4 @@
 
   #doc
 ]
+

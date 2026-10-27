@@ -7,8 +7,10 @@
   title: "Notes on Complexity Theory",
   author: "Luke Chu",
 )
-#title()
 
+// Document start
+
+#title()
 _Luke Chu #h(3em) Last updated: #datetime.today().display()_
 
 These notes cover the basics of complexity theory, building up to the theory of average-case complexity, and in particular, to the theory of quantum average-case complexity.
@@ -340,18 +342,6 @@ Every level $Sigma_k^P$ and $Pi_k^P$ have complete problems. However, $class.PH$
 
 We would like to investigate the power of Turing Machines that are allowed to make random coin tosses.
 
-= Quantum Computation
-
-== The Quantum Turing Machine Model
-
-== The Quantum Circuit Model
-
-== Grover's Search Algorithm
-
-== Simon's Algorithm
-
-== Shor's Algorithm
-
 = Average Case Complexity
 
 == Distributional Problems
@@ -473,32 +463,122 @@ TODO: precise statement and theorem.
 
 There is currently no known complete problem for $class.BPP$ (although of course if $class.P = class.BPP$, then every $class.P$-complete problem is also $class.BPP$-complete). So somewhat surprisingly, we do know of a complete problem for the distributional class $(class.AvgBPP, class.PSamp)$#footnote[The notation $(class.AvgBPP, class.PSamp)$ denotes the distributional complexity class containing all $(L, D)$ in $class.AvgBPP$ where $D in class.PSamp$.], due to @Itsykson_2010.
 
-Recall that the main obstacle to finding a complete problem for $class.BPP$ is the absence of an efficient enumeration of all bounded error probabilistic Turing Machines. One way around this is to consider promise-$class.BPP$ instead, for which a complete problem is known.
+Recall that the main obstacle to finding a complete problem for $class.BPP$ is the absence of an efficient enumeration of all bounded error probabilistic Turing Machines.
+A language $L$ is in $class.BPP$ if there exists a probabilistic Turing Machine $M$ that accepts $x$ with probability at least $2/3$ if $x in L$, and accepts $x$ with probability at most $1/3$ if $x in.not L$. Thus there is a gap of $1/3$ between the acceptance and rejection probabilities. Since an arbitrary probabilistic Turing Machine can have some acceptance or rejection probability that lies somewhere in this gap for some inputs, not all probabilistic Turing Machines decide languages in $class.BPP$.
+One way around this is to consider promise-$class.BPP$ instead, where we only consider inputs that are promised to have an acceptance or rejection probability that is bounded away from $1/2$.
+
+So the problem is that some probabilistic Turing Machines are "troublesome" in that they do not have a clear majority answer for some inputs. In the distributional setting, we can take advantage of the distribution to construct a problem such that these "troublesome" machines are assigned a very small probability.
+
+=== Reductions for $(class.AvgBPP, class.PSamp)$
+
+We define a notion of deterministic, distributional Turing reduction for problems $(L, D)$ and $(L', D')$.
+
+#definition[Deterministic Turing reduction][
+  A distributional problem $(L, D)$ is _errorlessly reducible_ to a problem $(L', D')$ if $exists$ a deterministic polynomial-time Turing Machine $M(x; delta)$ equiped with an oracle for $L'$ such that:
+  - (Effectiveness) $M(x; delta)$ runs in time $"poly"((|x|)/delta)$.
+  - (Correctness) $forall x in "supp"(D), med M(x; delta) in {L(x), bot}$.
+  - (Usefullness) $forall n, med Pr_(x tilde D_n)(M(x; delta) = bot) < delta$.
+  - (Domination) There exists a polynomial $p(n)$ and a sequence of subsets $E_n subset.eq {0, 1}^n$ of small measure $D_n (E_n) < delta$ such that
+    $
+      forall y in {0, 1}^*, sum_(x in {0, 1}^* \\ E_n) "Ask"_(M, delta)(x, y) D_n(x) <= p(n/delta) D'(y),
+    $
+    where $"Ask"_(M, delta)(x, y)$ = 1 if $M(x; delta)$ queries the oracle for a string $y$ and 0 otherwise. $E_n$ can informally be thought of as the set of "bad" inputs for which the reduction does not work, and the domination condition ensures that these bad inputs do not have too much probability mass under the distribution $D_n$.
+
+  If $(L, D)$ is errorlessly reducible to $(L', D')$, we write $(L, D) <=_T (L', D')$.
+]<def:deterministic-turing-reduction-avgBPP>
+
+#remark[
+  The domination condition is reminiscent of the notion of _domination_ in the Levin-style many-to-one reductions for distributional problems.
+  The difference here is that since we are using Turing reductions, the domination condition should be applied to the cases where we query the oracle, rather than on the inputs themselves.
+]
+
+This notion of reduction is relevant to $class.AvgBPP$ because of the following closure property.
+
+#lemma[
+  $class.AvgBPP$ is closed under reductions as defined in @def:deterministic-turing-reduction-avgBPP.
+  In other words, if $(L, D) <=_T (L', D')$ and $(L', D') in class.AvgBPP$, then $(L, D) in class.AvgBPP$.
+]
+
+#remark[
+  Similar to how $class.P$ is closed under polynomial-time Turing reductions (since $class.P = class.P^class.P$), $class.AvgBPP$ is closed under deterministic distributional polynomial-time Turing reductions.
+
+  This is in contrast to classes like $class.NP$ which are not closed under polynomial-time Turing reductions, since this would correspond to the class $class.P^class.NP$ which is strictly bigger than $class.NP$ unless the polynomial hierarchy collapses.
+]
+
+=== The Complete Language
+
+We introduce some arbitrary parameter $0 < epsilon < 1/10$ with the following interpretation:
+- $lambda = 5 epsilon$: probability of $bot$ above which we return the fallback bit,
+- $a_0 = 1-5 epsilon$: boundary used in the correctness argument,
+- $a_1 = 1-4 epsilon$: threshold for decision algorithm,
+- $a_2 = 1-3 epsilon$: boundary for statistically bad inputs,
+- $a_3 = 1-2 epsilon$: acceptance threshold of the distribution sampler,
+- $a_4 = 1-epsilon$: probability guaranteeing that the sampler accepts with high probability.
+The actual values of these parameters is not so important#footnote[The values used in the original paper by Itsykson @Itsykson_2010 can be recovered by setting $lambda = 1/4$ and $epsilon = 1/20$.], as long as they satisfy the following inequality:
+$ lambda < 1/2 < a_0 < a_1 < a_2 < a_3 < a_4 < 1. $
 
 We will now describe a complete distributional problem $(C, R)$ for $(class.AvgBPP, class.PSamp)$.
 
 Let $M^(<=m)$ denote the probabilistic Turing Machine $M$ that is restricted to run for at most $m$ steps. If $M$ has not halted after $m$ steps, it outputs the failure symbol $bot$.
 
-Let $"freq"(M(x))$ denote the most frequent output of $M$ on input $x$ over all possible internal coin tosses of $M$, and let $"prob"(M(x))$ be the probability of $"freq"(M(x))$.
-
-// We start with a modification of the standard complete problem: $C$ consists of tuples $(M, x, 1^t)$ where $M$ is a probabilistic Turing Machine, $x$ is an input string, and $t$ is a time bound, such that $M$ accepts $x$ in time $t$ with probability at least $1/2$.
+Let $"freq"(M(x))$ denote the most frequent output of $M$ on input $x$ over all possible internal coin tosses of $M$, and let $p(M(x))$ be the probability of $"freq"(M(x))$.
 
 All strings in $C$ have the form $(M, y, 1^m, b, S, 1^s)$, where:
 - $M$ is a probabilistic Turing Machine,
 - $y$ is an input string to $M$,
-- $m$ is the maximum steps that $M$ can take, with $m > |y_0| + N_0$ for some sufficiently large constant $N_0$,
+- $m$ is the maximum steps that $M$ can take,
 - $b in {0, 1}$ is the answer that would be used instead of $bot$ for the machine $M^(<=m)$,
-- $S$ is the encoding of a sampler
+- $S$ is the encoding of a sampler,
 - $1^s$ is the maximum steps that $S$ can take.
 The language $C$ is defined by the following characteristic function:
 $
-  C(M, y, 1^m, b, S, 1^s) = cases(b &"if" quad Pr_M (M^(<=m)(y) = bot) >= 1/4",", "freq"(M^(<=m)(y)) quad &"otherwise.")
+  C(M, y, 1^m, b, S, 1^s) = cases(b &"if" quad Pr_M (M^(<=m)(y) = bot) >= lambda",", "freq"(M^(<=m)(y)) quad &"if" quad Pr_M (M^(<=m)(y) = bot) < lambda.)
 $
 
-In particular, this defines a (deterministic) procedure that needs to check every possible sequence of coin tosses of $M^(<=m)$ to determine the most frequent output.
+In particular, we can decide $C$ by a deterministic algorithm simply by checking every possible sequence of coin tosses of $M^(<=m)$ to determine the most frequent output.
 
-The central idea in constructing the sampler $R$ is to assign to machines $M^(<=m)$ that do not have a clear majority answer a very small probability.
-This ensures that $C$, which is defined using expensive exhaustive computation, is efficient randomized on average.
+We now introduce a sampling algorithm $R$, which we claim satisfies the condition that $(C, R) in (class.AvgBPP, class.PSamp)$.
+#algorithm[The sampling algorithm $R$][
+  - Generate a string $w$ of length $n$ and interpret it as $(M, y, r, b, S, sigma)$, where $b in {0, 1}$. If $w$ is not of this form, return $w$.
+  - Run the sampler $S^(<=abs(sigma))(1^abs(y))$ to obtain $x$. If it fails to output a string of length $abs(y)$, return $1^n$.
+  - Run $M^(<=abs(r))(x)$ for $K_R(n) = ceil((5 n ln 2)/(2 epsilon^2))$ times. If neither 0 or 1 is returned at least $a_3$ of the time, return $1^n$.
+  - Otherwise, return $(M, x, 1^abs(r), b, S, 1^abs(sigma))$.
+]
+
+Let $H$ be the distribution ensemble generated by the sampling algorithm $R$.
+
+#lemma[Sampling lemma][
+  The sampler $R$ runs in polynomial time and satisifies the following properties:
+  + Small probability of bad inputs:
+    for every well-formed input, if $p(M^(<=m) (x)) <= a_2$, then $R_n (z) <= 2^(-4n)$.
+  + Domination of good inputs:
+    let $S$ be a sampler for $D$, and asume $S(1^abs(x))$ always halts within $s$ steps.
+    Then if $p(M^(<=m) (x)) >= a_4$, then $R_n (z) >= 1/2 D_abs(x) (x) 2^(-abs(M) - abs(S) - 1- h)$, where $h$ is some encoding overhead for the 6-tuple.
+  + Membership in $class.AvgBPP$:
+    the distributional problem $(C, H)$ is in $class.AvgBPP$.
+]
+
+#proof[
+  To show that $(C, H) in class.AvgBPP$, we can explicitly construct an $class.AvgBPP$ algorithm $A(z; delta)$ as follows.
+
+  We choose some constant number of repetitions
+  $ K = ceil((ln 64)/(2 epsilon^2)). $
+
+  On input $(z; delta)$, where $z = (M, y, 1^m, b, S, 1^s)$, we run the following procedure:
+  - If $delta <= 2^(-n)$, enumerate all random choices of $M^(<=m)(y)$, calculate its exact probability, and return $C(z)$.
+  - If $delta > 2^(-n)$, we execute $M^(<=m)(y)$ independently for $K$ times. Return $c in {0, 1}$ if it appears in at least $a_1$ fraction of the executions, and return $bot$ otherwise.
+
+  Crucially, $K$ is independent of both $m$ and $n$.
+
+  To show that this algorithm is in $class.AvgBPP$ (according to @def:AvgBPP), we need to show that it satisfies the effectiveness, correctness, and usefullness conditions.
+  - (Effectiveness) If $delta <= 2^(-n)$, since $M$ runs for at most $m$ steps, it uses at most $O(m)$ random bits. There are at most $2^O(m)$ possible sequences of coin tosses so we can enumerate all of them in that time. Simulating each round is polynomial in $n$ (which also includes the description of $M$), so the total running time is $t(z; delta) <= 2^O(m) "poly"(n)$. This is polynomial in $n/delta$ since $m <= n$ and $2^n <= 1/delta$.
+
+    For the other case, if $delta > 2^(-n)$, we run $K = O(1)$ executions which is independent of $n$ and $delta$.
+]
+
+#theorem[
+  $(C, H)$ is complete for $(class.AvgBPP, class.PSamp)$ under deterministic Turing reductions as defined in @def:deterministic-turing-reduction-avgBPP.
+]
 
 #emph-block[
   *Summary*:
