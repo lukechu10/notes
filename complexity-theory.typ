@@ -281,7 +281,7 @@ We are now ready to define the polynomial hierarchy.
 
 == Properties of the Polynomial Hierarchy
 
-We believe that $class.NP != class.coNP$. We can generalize this to the conjecture that $Sigma_k^P != Sigma_(k+1)^P$ for all $k >= 1$. This is often stated as _the polynomial hierarchy does not collapse_.
+We believe that $class.NP != class.coNP$. We can generalize this to the conjecture that $Sigma_k^P != Sigma_(k+1)^P$ for all $k >= 0$. This is often stated as _the polynomial hierarchy does not collapse_.
 
 If for some $k$, $Sigma_k^P = Sigma_(k+1)^P$, then we say that _the polynomial hierarchy collapses to the $k$-th level_. This also implies that $class.PH = Sigma_k^P = union.big_(k >= 0) Sigma_k^P$.
 
@@ -332,7 +332,7 @@ Every level $Sigma_k^P$ and $Pi_k^P$ have complete problems. However, $class.PH$
 #emph-block[
   *Summary*:
   - The polynomial hierarchy $class.PH$ is a hierarchy of complexity classes that generalizes $class.P$, $class.NP$, and $class.coNP$. It is defined using alternating quantifiers, and can also be defined in terms of alternating Turing Machines.
-  - The polynomial hierarchy is believed to not collapse, i.e. $Sigma_k^P != Sigma_(k+1)^P$ for all $k >= 1$. If it does collapse, then it collapses to some level $k$.
+  - The polynomial hierarchy is believed to not collapse, i.e. $Sigma_k^P != Sigma_(k+1)^P$ for all $k >= 0$. If it does collapse, then it collapses to some level $k$.
   - Every level of the polynomial hierarchy has complete problems, but the polynomial hierarchy itself does not have any complete problems unless it collapses to some level $k$.
 ]
 
@@ -401,7 +401,7 @@ We can also define the notion of average polynomial time using _errorless heuris
   In particular, we say that a distributional problem $(L, D)$ is polynomial-time solvable on average if there exists an algorithm $A(x, delta)$ such that:
   - (Effectiveness) $A(x, delta)$ runs in time $"poly"(x/delta)$.
   - (Correctness) $forall x, A(x, delta) in {L(x), bot}$.
-  - (Usefullness) $Pr_(x tilde D_n)(A(x, delta) = bot) < delta$
+  - (Usefulness) $Pr_(x tilde D_n)(A(x, delta) = bot) < delta$
 
   Such a problem is said to be in the class $class.AvgP$.
 
@@ -415,7 +415,7 @@ We can relax the condition that the algorithm $A$ is errorless, and allow it to 
   A distributional problem $(L, D)$ is in $class.AvgBPP$ if there exists a randomized algorithm $A(x, delta)$ such that:
   - (Effectiveness) $A(x, delta)$ runs in time $"poly"(x/delta)$.
   - (Correctness) $forall x, Pr(A(x, delta) in.not {L(x), bot}) <= 1/4$.
-  - (Usefullness) $Pr_(x tilde D_n)(Pr_A (A(x, delta) = bot) >= 1/4) < delta$.
+  - (Usefulness) $Pr_(x tilde D_n)(Pr_A (A(x, delta) = bot) >= 1/4) < delta$.
   For the final condition, note that the outer probability is over the choice of $x$ from the distribution $D_n$, while the inner probability is over the internal coin tosses of $A$.
 
   The algorithm $A$ is also called a _randomized errorless heuristic scheme_ for $(L, D)$. In this case, "errorless" refers to the proportion of inputs for which the algorithm fails (which can be made arbitrarily small), rather than the internal randomness of the algorithm.
@@ -471,12 +471,17 @@ One way around this is to consider promise-$class.BPP$ instead, where we only co
 
 So the problem is that some probabilistic Turing Machines are "troublesome" in that they do not have a clear majority answer for some inputs. In the distributional setting, we can take advantage of the distribution to construct a problem such that these "troublesome" machines are assigned a very small probability.
 
+The remainder of this section is devoted to describing a complete problem for $(class.AvgBPP, class.PSamp)$, largely based on @Itsykson_2010 but with some major simplifications and modifications.#footnote[
+  In particular, the original paper uses a more complicated sampling precedure as well as more restrictions on the language $C$.
+]
+
 === Reductions for $(class.AvgBPP, class.PSamp)$
 
+Completeness can only be defined with respect to some notion of reduction.
 We define a notion of deterministic, distributional Turing reduction for problems $(L, D)$ and $(L', D')$.
 
 #definition[Deterministic Turing reduction][
-  A distributional problem $(L, D)$ is _errorlessly reducible_ to a problem $(L', D')$ if $exists$ a deterministic polynomial-time Turing Machine $M(x; delta)$ equiped with an oracle for $L'$ such that:
+  A distributional problem $(L, D)$ is _errorlessly reducible_ to a problem $(L', D')$ if $exists$ a deterministic polynomial-time Turing Machine $M(x; delta)$ equipped with an oracle for $L'$ such that:
   - (Effectiveness) $M(x; delta)$ runs in time $"poly"((|x|)/delta)$.
   - (Correctness) $forall x in "supp"(D), med M(x; delta) in {L(x), bot}$.
   - (Usefullness) $forall n, med Pr_(x tilde D_n)(M(x; delta) = bot) < delta$.
@@ -685,10 +690,10 @@ Part 2 of the sampling lemma establishes the domination condition, which is used
     Recall that $eta < epsilon/2$ and that $a_4 = 1-epsilon$. So $p(M^(<=m)(x)) > a_4$.
 
     Now use Part 2 of the sampling lemma to both $z_0$ and $z_1$ to get
-    $ R_abs(z_b) >= 1/2 D_n (z_b) 2^(-abs(M_delta) - abs(S) - 1 - h), $
+    $ R_abs(z_b) >= 1/2 D_n (x) 2^(-abs(M_delta) - abs(S) - 1 - h), $
     or equivalently,
     $
-      D_n (z_b) <= P(n; delta) R_abs(z_b) (z_b) quad "where" quad P(n; delta) = 2^(abs(M_delta) + abs(S) + 2 + h).
+      D_n (x) <= P(n; delta) R_abs(z_b) (z_b) quad "where" quad P(n; delta) = 2^(abs(M_delta) + abs(S) + 2 + h).
     $<eq:domination-upper-bound>
 
     We claim that $P(n; delta)$ is bounded by a polynomial in $n/delta$. Indeed:
@@ -698,7 +703,7 @@ Part 2 of the sampling lemma establishes the domination condition, which is used
 
     Therefore, we have $P(n; delta) = "poly"(n/delta)$. It remains to be shown that this pointwise bound implies the domination condition.
 
-    Fix an arbitary oracle query $z$. If $z$ is never queried by the reduction on inputs of length $n$, then
+    Fix an arbitrary oracle query $z$. If $z$ is never queried by the reduction on inputs of length $n$, then
     $ sum_(x in {0,1}^n \\ E_n) "Ask"_(T,delta)(x,z) D_n(x) = 0. $
 
     Otherwise $z$ is either $z_0$ or $z_1$ for some input $x$. In particular, $z$ uniquely determines $x$ because $x$ is part of the tuple $z$. Hence there is at most one $x in {0,1}^n$ such that $"Ask"_(T,delta)(x,z) = 1$. If $x in.not E_n$, then by @eq:domination-upper-bound we have
