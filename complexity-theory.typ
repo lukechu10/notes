@@ -432,8 +432,8 @@ We can relax the condition that the algorithm $A$ is errorless, and allow it to 
   #proof[
     Suppose $(L, D)$ is in $class.AvgBPP$ with an algorithm $A(x, delta)$ satisfying definition @def:AvgBPP. We can construct a new algorithm $B(x, delta)$ as follows: on input $x$, we run $A(x, delta)$ for $n=|x|$ number of times and return the most frequent answer among ${bot, 0, 1}$.
 
-    We now apply the Chernoff-Hoeffding bound which says that for $X_1, ... X_N$ independent and identically distributed random variables with $X_i in [0, 1]$ and $EE[X_i] = mu$, we have:
-    $ Pr(abs((sum_i X_i)/N - mu) >= epsilon) <= 2 e^(-2 n epsilon^2). $
+    We now apply the Chernoff-Hoeffding bound which says that for $X_1, ... X_n$ independent and identically distributed random variables with $X_i in [0, 1]$ and $EE[X_i] = mu$, we have:
+    $ Pr(abs((sum_i X_i)/n - mu) >= epsilon) <= 2 e^(-2 n epsilon^2). $
 
     Applying this with $X_i tilde A(x, delta) = bot$, we get that if $Pr(A(x, delta) = bot) <= 1/4$ then $Pr(B(x, delta) = bot) = g(n)$, where $g(n) = 2^(-Omega(n))$ is some function.
 
@@ -464,7 +464,26 @@ TODO: precise statement and theorem.
 
 == A Complete Problem for $(class.NP, class.PSamp)$
 
-TODO
+The key idea in constructing a complete problem for $(class.NP, class.PSamp)$ is to construct a _universal distribution_ which dominates all polynomial-time samplable distributions. This is done by enumerating all polynomial-time samplable distributions and assigning them a probability mass that decreases exponentially with the index of the distribution in the enumeration. One easy way to do this is to encode all such distributions as binary strings, and then assign a probability mass of $2^(-abs(S))$ to each sampler $S$.
+
+We have the following theorem:
+#theorem[Universal distribution][
+  There exists a distribution $U in class.PSamp$ such that every distribution $D in class.PSamp$ is dominated by $U$.
+  In other words, for every distribution $D in class.PSamp$, we have the following:
+  $ forall x in {0,1}^n, quad U_n (x) <= "poly"(n) D_n (x), $
+
+  for some polynomial $"poly"(n)$ that depends on $n$ and on $D$.
+]
+
+#proof[
+  We prove this by explicitly constructing such a distribution $U$.
+
+  We assume that every binary string represents a valid polynomial-time sampler. We then sample the distribution $U$ as follows.
+  We first sample a binary string $S$ from the distribution $2^(-abs(S))$. We then run the sampler $S$ to obtain a sample from the distribution $D_S$ that is sampled by $S$. We claim that the resulting distribution $U$ dominates all polynomial-time samplable distributions.
+
+  Let $D in class.PSamp$ be a polynomial-time samplable distribution. Then there exists a binary string $S_D$ that encodes a polynomial-time sampler for $D$. The probability of sampling $S_D$ from the distribution $2^(-abs(S))$ is at least $2^(-abs(S_D))$. Therefore, for every $x in {0, 1}^n$, we have
+  $ U_n (x) >= 2^(-abs(S_D)) D_n (x). $
+]
 
 == A Complete Problem for $class.AvgBPP$
 
@@ -489,7 +508,7 @@ We define a notion of deterministic, distributional Turing reduction for problem
   A distributional problem $(L, D)$ is _errorlessly reducible_ to a problem $(L', D')$ if $exists$ a deterministic polynomial-time Turing Machine $M(x; delta)$ equipped with an oracle for $L'$ such that:
   - (Effectiveness) $M(x; delta)$ runs in time $"poly"((|x|)/delta)$.
   - (Correctness) $forall x in "supp"(D), med M(x; delta) in {L(x), bot}$.
-  - (Usefullness) $forall n, med Pr_(x tilde D_n)(M(x; delta) = bot) < delta$.
+  - (Usefulness) $forall n, med Pr_(x tilde D_n)(M(x; delta) = bot) < delta$.
   - (Domination) There exists a polynomial $p(n)$ and a sequence of subsets $E_n subset.eq {0, 1}^n$ of small measure $D_n (E_n) < delta$ such that
     $
       forall y in {0, 1}^*, sum_(x in {0, 1}^* \\ E_n) "Ask"_(M, delta)(x, y) D_n(x) <= p(n/delta) D'(y),
@@ -687,7 +706,7 @@ Part 2 of the sampling lemma establishes the domination condition, which is used
     where the last inequality follows from the usefulness condition on $M$.
   - (Domination) The last step is to prove domination, in which we will use Part 2 of the sampling lemma (@lem:sampling-lemma)
 
-    Pick $E_n = {x in {0,1}^n : Pr_M (M(x) = bot) >= eta}$. By usefulness of $M$, we have $D_n (E_n) < delta$. We will now show that oracle queries made on on inputs outside $E_n$ have sufficiently large probability under $H_n$.
+    Pick $E_n = {x in {0,1}^n : Pr_M (M(x) = bot) >= eta}$. By usefulness of $M$, we have $D_n (E_n) < delta$. We will now show that oracle queries made on inputs outside $E_n$ have sufficiently large probability under $H_n$.
 
     Fix $x in "supp"(D_n \\ E_n)$. Since $x in.not E_n$, we have $Pr_M (M(x) = bot) < eta$. By correctness of $M$, we have $Pr_M (M(x) = 1 - L(x)) < eta$. Therefore,
     $ Pr_M (M(x) = L(x)) = 1 - Pr_M (M(x) = bot) - Pr_M (M(x) = 1 - L(x)) > 1 - 2eta. $
