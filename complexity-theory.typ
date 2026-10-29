@@ -19,6 +19,11 @@ The section on average case complexity is primarily based on _Average-Case Compl
 
 #outline()
 
+#show heading.where(level: 1): it => [
+  #pagebreak(weak: true)
+  #it
+]
+
 = Basic Complexity Classes
 
 == Turing Machines
@@ -744,6 +749,12 @@ Part 2 of the sampling lemma establishes the domination condition, which is used
     If we can show that this problem is in $class.AvgP$, then it would imply that $(class.AvgBPP, class.PSamp)$ collapses to $(class.AvgP, class.PSamp)$.
 ]
 
+= Quantum Computation
+
+In his seminal 1982 paper @Feynman_1982, Feynman observed that simulating quantum systems on classical computers is inefficient, and proposed the idea of a quantum computer as a more efficient alternative.
+
+It is well known that the state of a quantum system is described by a complex vector in a Hilbert space, and the dimension of this space grows exponentially with the number of particles, or qubits, in the system. But this, by itself, is not unique to the quantum world.
+Classical probabilities, after all, can also be described by a state vector in some linear space, where the components are non-negative real numbers. Quantum probability amplitudes, on the other hand, can be negative, or more generally, complex.
 
 = Quantum Average Case Complexity
 
@@ -758,6 +769,7 @@ Part 2 of the sampling lemma establishes the domination condition, which is used
 
  @article{Itsykson_2010, title={Structural complexity of AvgBPP}, volume={162}, ISSN={0168-0072}, DOI={10.1016/j.apal.2010.09.006}, number={3}, journal={Annals of Pure and Applied Logic}, author={Itsykson, Dmitry}, year={2010}, month=dec, pages={213–223} }
 
+ @article{Feynman_1982, title={Simulating physics with computers}, volume={21}, ISSN={1572-9575}, DOI={10.1007/BF02650179}, number={6}, journal={International Journal of Theoretical Physics}, author={Feynman, Richard P.}, year={1982}, month=jun, pages={467–488}, language={en} }
 ```
 
 #bibliography(bytes(bib.text), full: true, style: "ieee")
