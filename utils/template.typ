@@ -42,6 +42,18 @@
     },
   )
 
+  #set math.equation(numbering: it => {
+    let count = counter(heading).get().first()
+    numbering("(1.1)", count, it)
+  })
+  #show math.equation: it => {
+    if it.block and not it.has("label") and it.numbering != none [
+      #counter(math.equation).update(v => v - 1)
+      #math.equation(it.body, block: true, numbering: none)
+    ] else {
+      it
+    }
+  }
   #show outline.entry.where(level: 1): strong
   #show outline.entry.where(level: 1): set outline.entry(fill: [])
 

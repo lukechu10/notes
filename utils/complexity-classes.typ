@@ -25,15 +25,17 @@
 #let PH = math.sans("PH")
 #let AP = math.sans("AP")
 
-#let BQP = math.sans("BQP")
-#let QMA = math.sans("QMA")
-#let QIP = math.sans("QIP")
-#let EQP = math.sans("EQP")
-#let NQP = math.sans("NQP")
-
 #let AvgP = math.sans("AvgP")
 #let AvgBPP = math.sans("AvgBPP")
 #let distNP = math.sans("distNP")
 
 #let PSamp = math.sans("PSamp")
 #let PComp = math.sans("PComp")
+
+#let BQP = math.sans("BQP")
+#let QMA = math.sans("QMA")
+#let QIP = math.sans("QIP")
+#let EQP = math.sans("EQP")
+#let NQP = math.sans("NQP")
+
+#let AvgBQP = math.sans("AvgBQP")
