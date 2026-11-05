@@ -417,16 +417,42 @@ We can also define the notion of average polynomial time using _errorless heuris
 We can relax the condition that the algorithm $A$ is errorless, and allow it to make bounded errors. This gives us the class $class.AvgBPP$.
 
 #definition[The class $class.AvgBPP$][
-  A distributional problem $(L, D)$ is in $class.AvgBPP$ if there exists a randomized algorithm $A(x, delta)$ such that:
-  - (Effectiveness) $A(x, delta)$ runs in time $"poly"(x/delta)$.
-  - (Correctness) $forall x, Pr(A(x, delta) in.not {L(x), bot}) <= 1/4$.
-  - (Usefulness) $Pr_(x tilde D_n)(Pr_A (A(x, delta) = bot) >= 1/4) < delta$.
+  A distributional problem $(L, D)$ is in $class.AvgBPP$ if there exists a randomized algorithm $A(x; delta)$ such that:
+  - (Effectiveness) $A(x; delta)$ runs in time $"poly"(x/delta)$.
+  - (Correctness) $forall x, Pr_A (A(x; delta) in.not {L(x), bot}) <= 1/4$.
+  - (Usefulness) $Pr_(x tilde D_n)(Pr_A (A(x; delta) = bot) >= 1/4) < delta$.
   For the final condition, note that the outer probability is over the choice of $x$ from the distribution $D_n$, while the inner probability is over the internal coin tosses of $A$.
 
   The algorithm $A$ is also called a _randomized errorless heuristic scheme_ for $(L, D)$. In this case, "errorless" refers to the proportion of inputs for which the algorithm fails (which can be made arbitrarily small), rather than the internal randomness of the algorithm.
 ]<def:AvgBPP>
 
+Note that just like in the definition of $class.BPP$, the constant $1/4$ is arbitrary as follows from the amplification lemma below.
+
+#lemma[Amplification of $class.AvgBPP$ @Itsykson_2010][
+  A distributional problem $(L, D)$ in $class.AvgBPP$ can be solved by a randomized algorithm $B(x; delta)$ that satisfies the conditions from @def:AvgBPP with the constant $1/4$ replaced by any constant $c in (2^(- Omega(n)), 1/2)$.
+]<lem:AvgBPP-amplification>
+
+#remark[
+  Note that for @lem:AvgBPP-amplification, the other way does _not_ hold in general for constant $c in (1/4, 1/2)$. That is, just because there is some randomized algorithm $B(x; delta)$ that satisfies the condition from @def:AvgBPP with the constant $1/4$ replaced by some constant $c in (2^(-Omega(n)), 1/2)$ does not imply that the language recognized by this machine is in $class.AvgBPP$.
+
+  Consider the following counter-example.
+  The machine $B(x; delta)$ flips three coins generating $2^3 = 8$ possible outcomes, and returns the following answers regardless of the input $x$.
+  $ Pr(B(x; delta) = 0) = Pr(B(x; delta) = 1) = 3/8 quad "and" quad Pr(B(x; delta) = bot) = 1/4. $
+
+  This would satisfy the conditions from @def:AvgBPP with the constant $1/4$ replaced by $2/5 = 0.4$. In particular, we have:
+  - (Correctness) $Pr_B (B(x; delta) in.not {L(x), bot}) = 3/8 <= 2/5$
+  - (Usefulness) $Pr_(x tilde D_n)(Pr_B (B(x; delta) = bot) >= 2/5) = 0 < delta$.
+
+  So this would recognize any language $L$, but clearly not every language $L$ is in $class.AvgBPP$.
+]
+
+#proof[Proof of @lem:AvgBPP-amplification][
+  TODO
+]
+
 #remark[@Itsykson_2010][
+  TODO: remove
+
   The constant $1/4$ in the correctness and usefulness conditions are arbitrary and can be replaced by anything in the interval $(2^(-Omega(n)), 1/2)$.
 
   #proof[
@@ -516,7 +542,7 @@ We define a notion of deterministic, distributional Turing reduction for problem
     where $"Ask"_(M, delta)(x, y)$ = 1 if $M(x; delta)$ queries the oracle for a string $y$ and 0 otherwise. $E_n$ can informally be thought of as the set of "bad" inputs for which the reduction does not work, and the domination condition ensures that these bad inputs do not have too much probability mass under the distribution $D_n$.
 
   If $(L, D)$ is errorlessly reducible to $(L', D')$, we write $(L, D) <=_T (L', D')$.
-]<def:deterministic-turing-reduction-avgBPP>
+]<def:deterministic-turing-reduction-avgP>
 
 #remark[
   The domination condition is reminiscent of the notion of _domination_ in the Levin-style many-to-one reductions for distributional problems.
@@ -526,14 +552,25 @@ We define a notion of deterministic, distributional Turing reduction for problem
 This notion of reduction is relevant to $class.AvgBPP$ because of the following closure property.
 
 #lemma[
-  $class.AvgBPP$ is closed under reductions as defined in @def:deterministic-turing-reduction-avgBPP.
-  In other words, if $(L, D) <=_T (L', D')$ and $(L', D') in class.AvgBPP$, then $(L, D) in class.AvgBPP$.
+  $class.AvgP$ is closed under reductions as defined in @def:deterministic-turing-reduction-avgP.
+  In other words, if $(L, D) <=_T (L', D')$ and $(L', D') in class.AvgP$, then $(L, D) in class.AvgP$.
+]<lem:AvgP-reduction-closure>
+
+#remark[
+  Similar to how $class.P$ is closed under polynomial-time Turing reductions (since $class.P = class.P^class.P$), $class.AvgP$ is closed under deterministic distributional polynomial-time Turing reductions.
+
+  This is in contrast to classes like $class.NP$ which are not closed under polynomial-time Turing reductions, since this would correspond to the class $class.P^class.NP$ which is strictly bigger than $class.NP$ unless the polynomial hierarchy collapses.
 ]
 
 #remark[
-  Similar to how $class.P$ is closed under polynomial-time Turing reductions (since $class.P = class.P^class.P$), $class.AvgBPP$ is closed under deterministic distributional polynomial-time Turing reductions.
+  For the completeness result, we only need reduction-closure for $class.AvgP$ rather than $class.AvgBPP$. This is because we want to show that there is some complete problem $(C, R) in (class.AvgBPP, class.PSamp)$ such that:
+  - If $(L, D) in (class.AvgBPP, class.PSamp)$, then $(L, D) <=_T (C, R)$.
+  - If $(C, R) in (class.AvgP, class.PSamp)$, then $(L, D) in (class.AvgP, class.PSamp)$.
+  The last statement follows from the first statement and the closure property of $class.AvgP$ under reductions, and is sufficient to show that $(C, R)$ is complete for $(class.AvgBPP, class.PSamp)$.
+]
 
-  This is in contrast to classes like $class.NP$ which are not closed under polynomial-time Turing reductions, since this would correspond to the class $class.P^class.NP$ which is strictly bigger than $class.NP$ unless the polynomial hierarchy collapses.
+#proof[Proof of @lem:AvgP-reduction-closure][
+  TODO
 ]
 
 === The Complete Language
@@ -669,7 +706,7 @@ Part 1 of the sampling lemma establishes membership in $class.AvgBPP$ since it b
 Part 2 of the sampling lemma establishes the domination condition, which is used in the proof of completeness.
 
 #theorem[
-  $(C, H)$ is complete for $(class.AvgBPP, class.PSamp)$ under deterministic Turing reductions as defined in @def:deterministic-turing-reduction-avgBPP.
+  $(C, H)$ is complete for $(class.AvgBPP, class.PSamp)$ under deterministic Turing reductions as defined in @def:deterministic-turing-reduction-avgP.
 ]
 
 #proof[
@@ -683,7 +720,7 @@ Part 2 of the sampling lemma establishes the domination condition, which is used
 
   We now describe a deterministic polynomial-time Turing reduction $T$ that makes two queries to an oracle for $C$ for $z_(b in {0,1}) = (M(med dot med; delta), x, 1^g(abs(x)/delta), b, S, 1^q(abs(x)))$. If the answers of the oracle are different, return $bot$. Otherwise, return the answer of the oracle.
 
-  We now verify that this satisfies the conditions of a reduction according to @def:deterministic-turing-reduction-avgBPP.
+  We now verify that this satisfies the conditions of a reduction according to @def:deterministic-turing-reduction-avgP.
 
   - (Effectiveness) The reduction $T$ runs in polynomial time since it only makes two queries to the oracle with an query size of $O(g(abs(x)/delta) + q(abs(x))) = "poly"(abs(x)/delta)$ and does some postprocessing in constant time.
   - (Correctness) Fix $x in "supp"(D)$. Recalling the definition of $C$, we have:
@@ -781,6 +818,11 @@ Classical probabilities, after all, can also be described by a state vector in s
 = Examples of Quantum Average Case Complexity
 
 == Random Hamiltonian Simulation
+
+#set heading(numbering: none)
+= Appendix A. Probability Theory
+
+== Chernoff-Hoeffding Bound
 
 #let bib = ```bib
  @book{Arora_Barak_2009, title={Computational Complexity}, author={Arora, Sanjeev and Barak, Boaz}, language={en}, year={2009}, isbn={9780521424264} }
