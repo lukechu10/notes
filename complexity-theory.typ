@@ -419,56 +419,60 @@ We can relax the condition that the algorithm $A$ is errorless, and allow it to 
 #definition[The class $class.AvgBPP$][
   A distributional problem $(L, D)$ is in $class.AvgBPP$ if there exists a randomized algorithm $A(x; delta)$ such that:
   - (Effectiveness) $A(x; delta)$ runs in time $"poly"(x/delta)$.
-  - (Correctness) $forall x, Pr_A (A(x; delta) in.not {L(x), bot}) <= 1/4$.
+  - (Correctness) $forall x in "Supp"(D_n), Pr_A (A(x; delta) in.not {L(x), bot}) <= 1/4$.
   - (Usefulness) $Pr_(x tilde D_n)(Pr_A (A(x; delta) = bot) >= 1/4) < delta$.
   For the final condition, note that the outer probability is over the choice of $x$ from the distribution $D_n$, while the inner probability is over the internal coin tosses of $A$.
 
   The algorithm $A$ is also called a _randomized errorless heuristic scheme_ for $(L, D)$. In this case, "errorless" refers to the proportion of inputs for which the algorithm fails (which can be made arbitrarily small), rather than the internal randomness of the algorithm.
 ]<def:AvgBPP>
 
-Note that just like in the definition of $class.BPP$, the constant $1/4$ is arbitrary as follows from the amplification lemma below.
+Note that just like in the definition of $class.BPP$, the constant $1/4$ is arbitrary and can be any constant bounded away from $1/3$, as shown by the following lemma.
 
-#lemma[Amplification of $class.AvgBPP$ @Itsykson_2010][
-  A distributional problem $(L, D)$ in $class.AvgBPP$ can be solved by a randomized algorithm $B(x; delta)$ that satisfies the conditions from @def:AvgBPP with the constant $1/4$ replaced by any constant $c in (2^(- Omega(n)), 1/2)$.
+#lemma[Downward amplification for $class.AvgBPP$ @Itsykson_2010][
+  Suppose that for some positive $c < 1/3$, $A(x; delta)$ satisfies:
+  - (Effectiveness) $A(x; delta)$ runs in time $"poly"(x/delta)$.
+  - (Correctness) $forall x in "Supp"(D_n), Pr_A (A(x; delta) in.not {L(x), bot}) < c$
+  - (Usefulness) $Pr_(x tilde D_n)(Pr_A (A(x; delta) = bot) >= c) < delta$.
+
+  Then these conditions can be strengthened to any fixed positive internal threshold, or to an exponentially small threshold $2^(-q(n))$ where $q(n)$ is any polynomial, while preserving polynomial runtime and the exceptional-input bound $delta$.
 ]<lem:AvgBPP-amplification>
 
-#remark[
-  Note that for @lem:AvgBPP-amplification, the other way does _not_ hold in general for constant $c in (1/4, 1/2)$. That is, just because there is some randomized algorithm $B(x; delta)$ that satisfies the condition from @def:AvgBPP with the constant $1/4$ replaced by some constant $c in (2^(-Omega(n)), 1/2)$ does not imply that the language recognized by this machine is in $class.AvgBPP$.
+#proof[
+  We construct the scheme $B(x; delta)$ as follows.
+  On input $x$ with length $n=abs(x)$, we run the algorithm $A(x; delta)$ independently $m$ times and return the most frequent answer among ${bot, 0, 1}$, breaking ties arbitrarily.
 
-  Consider the following counter-example.
+  Set $gamma = 1/3 - c > 0$. The key observation is that if some output symbol has a single-run probability below $c$, then the probability that it wins the plurality vote is at most $e^(-2 m gamma^2)$. Indeed, to win, it must occur at least one third of the runs. Its expected frequency is below $c$ so this requires an upward deviation of at least $gamma$. The bound then follows from Hoeffding's inequality.
+
+  We now apply this observation to the correctness and usefulness conditions.
+
+  For correctness, the wrong boolean answer has probability below $c$. Therefore, we have
+  $ Pr_B (B(x; delta) in.not {L(x), bot}) = Pr_B (B(x; delta) = 1 - L(x)) <= e^(-2 m gamma^2). $
+
+  For usefulness, we apply the same argument to the probability of returning $bot$. So on any input $x$ for which $Pr_A (A(x; delta) = bot) < c$, we have $Pr_B (B(x; delta) = bot) <= e^(-2 m gamma^2)$. So for any target threshold $epsilon$ satisfying $e^(-2 m gamma^2) < epsilon$, we have the inclusion
+  $ {x : Pr_B (B(x; delta) = bot) >= epsilon} subset.eq {x : Pr_A (A(x; delta) = bot) >= c}. $
+  Taking probabilities over $x tilde D_n$ gives us the bound on the exceptional-input mass.
+
+  Finally, we can choose $m$ in order to achieve:
+  - a fixed target threshold $0 < epsilon < 1$: choose $m$ to be any integer $m > log(1/epsilon)/(2 (1/3 - c)^2)$.
+  - an exponentially small target threshold $2^(-q(n))$: chose $m$ such that $m(n) > (q(n) log 2)/(1/3 - c)^2$.
+
+  Effectiveness is clear since $B$ runs in the running time of $A$ multiplied with either a constant or a polynomial in $n$.
+]
+
+#remark[
+  Note that unlike for worst-case $class.BPP$, we cannot pick the correctness and usefulness conditions to be any constant $c in (0, 1/2)$. This is because we are working with three-output algorithms: it can either answer correctly, incorrectly, or give up. So a wrong answer probability below $1/2$ does not imply that the correct answer is more likely than the incorrect answer.
+
+  Explicitly, we can construct the following counterexample.
   The machine $B(x; delta)$ flips three coins generating $2^3 = 8$ possible outcomes, and returns the following answers regardless of the input $x$.
   $ Pr(B(x; delta) = 0) = Pr(B(x; delta) = 1) = 3/8 quad "and" quad Pr(B(x; delta) = bot) = 1/4. $
 
-  This would satisfy the conditions from @def:AvgBPP with the constant $1/4$ replaced by $2/5 = 0.4$. In particular, we have:
+  This would satisfy the conditions from @def:AvgBPP with the constant $1/4$ replaced by $2/5$. In particular, we have:
+  - (Effectiveness) Runs in constant time so trivial.
   - (Correctness) $Pr_B (B(x; delta) in.not {L(x), bot}) = 3/8 <= 2/5$
   - (Usefulness) $Pr_(x tilde D_n)(Pr_B (B(x; delta) = bot) >= 2/5) = 0 < delta$.
 
   So this would recognize any language $L$, but clearly not every language $L$ is in $class.AvgBPP$.
 ]
-
-#proof[Proof of @lem:AvgBPP-amplification][
-  TODO
-]
-
-#remark[@Itsykson_2010][
-  TODO: remove
-
-  The constant $1/4$ in the correctness and usefulness conditions are arbitrary and can be replaced by anything in the interval $(2^(-Omega(n)), 1/2)$.
-
-  #proof[
-    Suppose $(L, D)$ is in $class.AvgBPP$ with an algorithm $A(x, delta)$ satisfying definition @def:AvgBPP. We can construct a new algorithm $B(x, delta)$ as follows: on input $x$, we run $A(x, delta)$ for $n=|x|$ number of times and return the most frequent answer among ${bot, 0, 1}$.
-
-    We now apply the Chernoff-Hoeffding bound which says that for $X_1, ... X_n$ independent and identically distributed random variables with $X_i in [0, 1]$ and $EE[X_i] = mu$, we have:
-    $ Pr(abs((sum_i X_i)/n - mu) >= epsilon) <= 2 e^(-2 n epsilon^2). $
-
-    Applying this with $X_i tilde A(x, delta) = bot$, we get that if $Pr(A(x, delta) = bot) <= 1/4$ then $Pr(B(x, delta) = bot) = g(n)$, where $g(n) = 2^(-Omega(n))$ is some function.
-
-    Therefore, we have
-    $
-      Pr_(x tilde D_n)(Pr_B (B(x, delta) = bot) >= g(n)) <= Pr_(x tilde D_n)(Pr_A (A(x, delta) = bot) >= 1/4) < delta.
-    $
-  ]
-]<rmk:AvgBPP-constant>
 
 === The Complexity Class $class.distNP$
 
@@ -716,7 +720,7 @@ Part 2 of the sampling lemma establishes the domination condition, which is used
   - (Effectiveness) $M(x; delta)$ runs in time $"poly"(abs(x)/delta) = g(abs(x)/delta)$.
   - (Correctness) $forall x, Pr_M (M(x; delta) in.not {L(x), bot}) <= eta$.
   - (Usefullness) $forall n, Pr_(x tilde D_n)(Pr_M (M(x; delta) = bot) >= eta) < delta$.
-  Note that we can always reduce the error probability of $M$ to be at most $eta$ due to @rmk:AvgBPP-constant.
+  Note that we can always reduce the error probability of $M$ to be at most $eta$ due to @lem:AvgBPP-amplification.
 
   We now describe a deterministic polynomial-time Turing reduction $T$ that makes two queries to an oracle for $C$ for $z_(b in {0,1}) = (M(med dot med; delta), x, 1^g(abs(x)/delta), b, S, 1^q(abs(x)))$. If the answers of the oracle are different, return $bot$. Otherwise, return the answer of the oracle.
 
@@ -822,7 +826,26 @@ Classical probabilities, after all, can also be described by a state vector in s
 #set heading(numbering: none)
 = Appendix A. Probability Theory
 
-== Chernoff-Hoeffding Bound
+== Hoeffding's Inequality
+
+#theorem[Hoeffding's inequality for Bernoulli variables][
+  Let $X_1, ..., X_n$ be independent random variables such that $0 <= X_1 <= 1$. Consider the sum of these random variables,
+  $ S_n = X_1 + ... + X_n. $
+  Then we have for all $epsilon > 0$,
+  $
+         Pr(S_n - EE(S_n) >= epsilon) & <= exp((-2 epsilon^2)/n), \
+    Pr(abs(S_n - EE(S_n)) >= epsilon) & <= 2 exp((-2 epsilon^2)/n).
+  $
+  Or equivalently,
+  $
+       Pr((S_n - EE(S_n))/n >= epsilon) & <= exp(-2 n epsilon^2), \
+    Pr(abs(S_n - EE(S_n))/n >= epsilon) & <= 2 exp(-2 n epsilon^2).
+  $
+]<thm:hoeffding-inequality>
+
+#proof[
+  TODO
+]
 
 #let bib = ```bib
  @book{Arora_Barak_2009, title={Computational Complexity}, author={Arora, Sanjeev and Barak, Boaz}, language={en}, year={2009}, isbn={9780521424264} }
