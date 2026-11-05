@@ -349,7 +349,15 @@ We would like to investigate the power of Turing Machines that are allowed to ma
 
 = Average Case Complexity
 
+== Motivation
+
 == Distributional Problems
+
+We analyze average case complexity in the framework of _distributional problems_.
+A distributional problem is a pair $(L, D)$ where $L subset.eq {0, 1}^*$ is some language and $D$ is some probability distribution.
+One nuance is that the distribution is over all possible input strings ${0, 1}^*$, which is an infinite set.
+One way to get around this is to instead consider ensembles of distributions $D = {D_n}$ where $D_n$ is a distribution over strings of length $n$.
+Another possible way to resolve this issue is to scale the probability mass of each string by $2^abs(x)$. These two approaches are equivalent but the first one will turn out to be easier to work with.
 
 == Average Polynomial Time
 
@@ -823,9 +831,15 @@ Classical probabilities, after all, can also be described by a state vector in s
 
 = Quantum Average Case Complexity
 
+== Axis of Quantum Average Case Complexity
+
+== Generalization of completeness result of $class.AvgBPP$ to $class.AvgBQP$
+
 = Examples of Quantum Average Case Complexity
 
 == Random Hamiltonian Simulation
+
+== Quantum XOR Games
 
 #set heading(numbering: none)
 = Appendix A. Probability Theory
