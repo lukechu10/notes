@@ -426,6 +426,10 @@ We can relax the condition that the algorithm $A$ is errorless, and allow it to 
   The algorithm $A$ is also called a _randomized errorless heuristic scheme_ for $(L, D)$. In this case, "errorless" refers to the proportion of inputs for which the algorithm fails (which can be made arbitrarily small), rather than the internal randomness of the algorithm.
 ]<def:AvgBPP>
 
+When working with randomized algorithms, we will use Hoeffding's inequality quite often.
+This inequality gives us an exponential bound on the probability of large deviations of the sum of independent random variables from its expected value.
+See @thm:hoeffding-inequality for a formal statement of the inequality.
+
 Note that just like in the definition of $class.BPP$, the constant $1/4$ is arbitrary and can be any constant bounded away from $1/3$, as shown by the following lemma.
 
 #lemma[Downward amplification for $class.AvgBPP$ @Itsykson_2010][
