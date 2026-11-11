@@ -586,7 +586,24 @@ This notion of reduction is relevant to $class.AvgBPP$ because of the following 
 ]
 
 #proof[Proof of @lem:AvgP-reduction-closure][
-  TODO
+  Let $(L', D')$ be solvable by algorithm $A'(x; delta)$ in $class.AvgP$ and $T(x; delta)$ be the errorless reduction of $(L, D)$ to $(L', D')$, where $T$ has oracle access to $L'$.
+  The running time of $A'(x; delta)$ is bounded by a polynomial $q(abs(x)/delta)$ and the number of oracle queries of $T(x; delta)$ is bounded by a polynomial $f(abs(x)/delta)$. Consider the sequence of lengths of queries $k_1, k_2, ..., k_f(abs(x)/delta)$ on the input length $n$.
+
+  We now define algorithm $A(x; delta)$ which solves $(L, D)$ as follows. Execute $T(x; delta/3)$ and simulate $A'(y, epsilon(abs(x), delta))$ instead of an oracle query $y$, where $epsilon(n, delta) = delta/(3 p(n/delta) f(n/delta))$.
+  If $A'$ outputs $bot$, then $A$ outputs $bot$. The probability of returning $bot$ is bounded by:
+  $
+    Pr_(x tilde D_n)(A(x; delta) = bot)) <= Pr_(x tilde D_n)(T(x; delta/3) = bot) + D_n (E_n) + sum_(x in {0, 1}^n \\ E_n \ y in {0,1}^n \ A'(y; epsilon(n, delta)) = bot) "Ask"_(T, delta)(x, y) D_n (x) \
+    <= delta/3 + delta/3 + sum_(x in {0,1}^n \ E_n) sum_(i=1)^(f(n/delta)) sum_(y in {0,1}^(k_i) \ A'(y; epsilon(n, delta)) = bot) "Ask"_(T, delta) (x,y) D_n (x).
+  $
+
+  Using the domination condition, we can bound the last term which gives us
+  $
+    Pr_(x tilde D_n) (A(x; delta) = bot) & <= (2 delta)/3 + sum_(i = 1)^(f(n/delta)) sum_(y in {0,1}^(k_i) \ A'(y; epsilon(n, delta)) = bot) p(n/delta) D'(y) \
+    & = (2 delta)/3 + sum_(i=1)^(f(n/delta)) p(n/delta) Pr_(y tilde D'_(k_i)) (A'(y; epsilon(n, delta)) = bot) \
+    &< (2 delta)/3 + sum_(i = 1)^(f(n/delta)) p(n/delta) epsilon(n, delta) = (2 delta)/3 + f(n/delta) delta/(3 f(n/delta)) = delta.
+  $
+
+  This completes the proof.
 ]
 
 === The Complete Language
