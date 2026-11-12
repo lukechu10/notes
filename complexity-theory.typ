@@ -384,7 +384,7 @@ Instead, we can define average polynomial time in terms of a polynomial trade-of
 #definition[Average polynomial time, trade-off definition][
   An algorithm $A$ is said to run in _average polynomial time_ for a distribution $D$ if there exists some $epsilon > 0$ and some polynomial $p(n)$ such that for all $t$,
   $ Pr_(x tilde D_n)[t_A (x) >= t] <= p(n)/t^epsilon. $
-]<def:avg-poly-time>
+]<def:AvgP>
 
 #remark[
   This definition bears strong resemblance to Markov's inequality, which states that for a non-negative random variable $X$ and any $a > 0$, we have
@@ -393,34 +393,52 @@ Instead, we can define average polynomial time in terms of a polynomial trade-of
   TODO: reason out what the intuitive significance of this connection is.
 ]
 
-#lemma[
-  An algorithm $A$ runs in average polynomial time (according to @def:avg-poly-time) iff it satisfies the following condition for some $epsilon > 0$:
+#definition[Average polynomial time, Levin's definition][
+  An algorithm $A$ runs in average polynomial time iff it satisfies the following condition for some $epsilon > 0$:
   $ EE_(x tilde D_n)[t_A (x)^epsilon] = O(n). $
 
   Furthermore, $O(n)$ can be replaced by any polynomial in $n$.
-]
+]<def:AvgP-Levin>
 
-#proof[TODO]
+This provides an alternative definition of average polynomial time that is equivalent to @def:AvgP.
+Finally, we can also define the notion of average polynomial time using _errorless heuristic schemes_.
 
-This provides an alternative definition of average polynomial time that is equivalent to @def:avg-poly-time.
-
-TODO: complete section
-
-We can also define the notion of average polynomial time using _errorless heuristic schemes_.
-
-#definition[Errorless heuristic scheme, the class $class.AvgP$][
+#definition[Errorless heuristic scheme][
   An _errorless heuristic scheme_ for a distributional problem $(L, D)$ is an algorithm $A(x, delta)$ that takes as input an instance $x$ and a parameter $delta in (0, 1)$, and outputs either $L(x)$ or a special symbol $bot$ indicating that it failed to solve the problem. The algorithm is allowed to fail with probability at most $delta$ over the choice of $x$ from the distribution $D_n$, where $n = |x|$.
 
   In particular, we say that a distributional problem $(L, D)$ is polynomial-time solvable on average if there exists an algorithm $A(x, delta)$ such that:
   - (Effectiveness) $A(x, delta)$ runs in time $"poly"(x/delta)$.
   - (Correctness) $forall x, A(x, delta) in {L(x), bot}$.
   - (Usefulness) $Pr_(x tilde D_n)(A(x, delta) = bot) < delta$
+]<def:errorless-heuristic-scheme>
 
-  Such a problem is said to be in the class $class.AvgP$.
+#theorem[The class $class.AvgP$][
+  The class defined by @def:AvgP is equivalent to the class defined by @def:AvgP-Levin and the class defined by @def:errorless-heuristic-scheme.
 
+  Such a problem is said to be in the distributional complexity class $class.AvgP$.
+]
+#proof[
+  For equivalence between @def:AvgP and @def:AvgP-Levin, see @Bogdanov_Trevisan_2021.
+
+  Now we show the equivalence from Levin (@def:AvgP-Levin) $->$ errorless heuristic scheme (@def:errorless-heuristic-scheme) $->$ trade off definition (@def:AvgP).
+
+  $(==>)$: We wish to construct an errorless heuristic scheme $A'(x; delta)$ with failure probability $delta$, starting from an algorithm $A$ that runs in average polynomial time and always answers correctly. The idea is to simulate $A$ for a certain number of steps $T$ and if it does not halt in that time, we output $bot$.
+
+  We choose $T$ such that $Pr_(x tilde D_n)(A'(x; delta) = bot) = Pr_(x tilde D_n)(t_A (x) > T) < delta$.
+  By Markov's inequality (@thm:Markov-inequality), we have
+  $
+    Pr_(x tilde D_n)(t_A (x) > T) = Pr_(x tilde D_n)(t_A (x)^epsilon > T^epsilon) = EE[t_A (x)^epsilon]/T^epsilon = (C n)/T^epsilon < delta
+  $
+  for some constants $C > 0$ and $epsilon > 0$. Therefore we can choose $T = ((C n)/delta)^(1/epsilon)$.
+
+  $(<==)$: We start by running the errorless heuristic scheme $B(x; delta)$ for $delta = 1/2$. If it returns an answer, we return it. Otherwise, we run it again for $delta = 1/4$, then $delta = 1/8$, and so on, until it returns an answer. Let $k$ be the number of times we run the algorithm before it returns an answer. Then for a fraction $delta$ of the inputs, we have $k <= log(1/delta)$ and a running time of
+  $ p(2 n) + p(4 n) + ... + p(2^k n) < k p(2^k n) <= log(1/delta) p(n/delta) = "poly"(n/delta), $
+  up to logarithmic overhead for some polynomial $p$. It is easy to verify that this algorithm runs in average polynomial time according to @def:AvgP.
 ]
 
 === The Complexity Class $class.AvgBPP$
+
+It turns out that the final definition of $class.AvgP$ using errorless heuristic schemes is the easiest to generalize
 
 We can relax the condition that the algorithm $A$ is errorless, and allow it to make bounded errors. This gives us the class $class.AvgBPP$.
 
@@ -436,7 +454,7 @@ We can relax the condition that the algorithm $A$ is errorless, and allow it to 
 
 When working with randomized algorithms, we will use Hoeffding's inequality quite often.
 This inequality gives us an exponential bound on the probability of large deviations of the sum of independent random variables from its expected value.
-See @thm:hoeffding-inequality for a formal statement of the inequality.
+See @thm:Hoeffding-inequality for a formal statement of the inequality.
 
 Note that just like in the definition of $class.BPP$, the constant $1/4$ is arbitrary and can be any constant bounded away from $1/3$, as shown by the following lemma.
 
@@ -861,6 +879,15 @@ Classical probabilities, after all, can also be described by a state vector in s
 #set heading(numbering: none)
 = Appendix A. Probability Theory
 
+== Markov's Inequality
+
+TODO
+
+#theorem[Markov's inequality][
+  Let $X$ be a non-negative random variable. Then for any $a > 0$,
+  $ Pr(X >= a) <= EE(X)/a. $
+]<thm:Markov-inequality>
+
 == Hoeffding's Inequality
 
 #theorem[Hoeffding's inequality for Bernoulli variables][
@@ -876,7 +903,7 @@ Classical probabilities, after all, can also be described by a state vector in s
        Pr((S_n - EE(S_n))/n >= epsilon) & <= exp(-2 n epsilon^2), \
     Pr(abs(S_n - EE(S_n))/n >= epsilon) & <= 2 exp(-2 n epsilon^2).
   $
-]<thm:hoeffding-inequality>
+]<thm:Hoeffding-inequality>
 
 #proof[
   TODO
