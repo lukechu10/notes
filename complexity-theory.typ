@@ -524,26 +524,26 @@ TODO: precise statement and theorem.
 
 == A Complete Problem for $(class.NP, class.PSamp)$
 
-The key idea in constructing a complete problem for $(class.NP, class.PSamp)$ is to construct a _universal distribution_ which dominates all polynomial-time samplable distributions. This is done by enumerating all polynomial-time samplable distributions and assigning them a probability mass that decreases exponentially with the index of the distribution in the enumeration. One easy way to do this is to encode all such distributions as binary strings, and then assign a probability mass of $2^(-abs(S))$ to each sampler $S$.
-
-We have the following theorem:
-#theorem[Universal distribution][
-  There exists a distribution $U in class.PSamp$ such that every distribution $D in class.PSamp$ is dominated by $U$.
-  In other words, for every distribution $D in class.PSamp$, we have the following:
-  $ forall x in {0,1}^n, quad U_n (x) <= "poly"(n) D_n (x), $
-
-  for some polynomial $"poly"(n)$ that depends on $n$ and on $D$.
-]
-
-#proof[
-  We prove this by explicitly constructing such a distribution $U$.
-
-  We assume that every binary string represents a valid polynomial-time sampler. We then sample the distribution $U$ as follows.
-  We first sample a binary string $S$ from the distribution $2^(-abs(S))$. We then run the sampler $S$ to obtain a sample from the distribution $D_S$ that is sampled by $S$. We claim that the resulting distribution $U$ dominates all polynomial-time samplable distributions.
-
-  Let $D in class.PSamp$ be a polynomial-time samplable distribution. Then there exists a binary string $S_D$ that encodes a polynomial-time sampler for $D$. The probability of sampling $S_D$ from the distribution $2^(-abs(S))$ is at least $2^(-abs(S_D))$. Therefore, for every $x in {0, 1}^n$, we have
-  $ U_n (x) >= 2^(-abs(S_D)) D_n (x). $
-]
+// The key idea in constructing a complete problem for $(class.NP, class.PSamp)$ is to construct a _universal distribution_ which dominates all polynomial-time samplable distributions. This is done by enumerating all polynomial-time samplable distributions and assigning them a probability mass that decreases exponentially with the index of the distribution in the enumeration. One easy way to do this is to encode all such distributions as binary strings, and then assign a probability mass of $2^(-abs(S))$ to each sampler $S$.
+//
+// We have the following theorem:
+// #theorem[Universal distribution][
+//   There exists a distribution $U in class.PSamp$ such that every distribution $D in class.PSamp$ is dominated by $U$.
+//   In other words, for every distribution $D in class.PSamp$, we have the following:
+//   $ forall x in {0,1}^n, quad U_n (x) <= "poly"(n) D_n (x), $
+//
+//   for some polynomial $"poly"(n)$ that depends on $n$ and on $D$.
+// ]
+//
+// #proof[
+//   We prove this by explicitly constructing such a distribution $U$.
+//
+//   We assume that every binary string represents a valid polynomial-time sampler. We then sample the distribution $U$ as follows.
+//   We first sample a binary string $S$ from the distribution $2^(-abs(S))$. We then run the sampler $S$ to obtain a sample from the distribution $D_S$ that is sampled by $S$. We claim that the resulting distribution $U$ dominates all polynomial-time samplable distributions.
+//
+//   Let $D in class.PSamp$ be a polynomial-time samplable distribution. Then there exists a binary string $S_D$ that encodes a polynomial-time sampler for $D$. The probability of sampling $S_D$ from the distribution $2^(-abs(S))$ is at least $2^(-abs(S_D))$. Therefore, for every $x in {0, 1}^n$, we have
+//   $ U_n (x) >= 2^(-abs(S_D)) D_n (x). $
+// ]
 
 == A Complete Problem for $class.AvgBPP$
 
