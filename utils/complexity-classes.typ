@@ -32,6 +32,9 @@
 #let PSamp = math.sans("PSamp")
 #let PComp = math.sans("PComp")
 
+#let BQPSamp = math.sans("BQPSamp")
+#let BQPComp = math.sans("BQPComp")
+
 #let BQP = math.sans("BQP")
 #let QMA = math.sans("QMA")
 #let QIP = math.sans("QIP")
