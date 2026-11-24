@@ -1083,7 +1083,7 @@ The clock and trial count make this a polynomial-time sampler. Two consequences 
   *Padding.* Take the fixed generator $G$ that samples $x$ using $S(1^n)$, chooses a fair bit $b$, and outputs the unpadded circuit $C_b (x)$ using the reduction's compiler. Choose $N >= max(3, n, k)$ as a computable polynomial bound in $n+2^k$ large enough for this generator's worst-case running time, the circuit fields, and the triple's prefix code. Thus $N$ depends only on $n,k$, both queries have length $2N$, and constructing them takes deterministic polynomial time in $n/delta$. The reduction only writes down descriptions; it never samples $x$, $b$, or a circuit assignment.
 
   *Domination.* In the target sampler, the generator branch has probability at least $1/2$, the desired triple is selected with probability $lambda$ in that branch, and either bit is chosen with probability $1/2$. For $x$ outside $E$ either query passes the filter with probability at least $1/2$. Hence for every query string $y$ of length $2N$,
-  $ nu_(2N)(y) >= lambda/8 sum_(x in.not E) D_n(x) sum_(b in {0,1}) bold(1)[Q_b(x)=y]. $
+  $ nu_(2N)(y) >= lambda/8 sum_(x in.not E) D_n(x) sum_(b in {0,1}) bold(1)[Q_b (x)=y]. $
   The inner sum is at least the indicator that the reduction asks $y$, even when the queries coincide. Rearranging proves domination with factor $8/lambda$, polynomial in $n/delta$. The exceptional inputs need not pass the filter often: their queries still have support by the uniform branch, and domination is required only outside $E$.
 ]
 
