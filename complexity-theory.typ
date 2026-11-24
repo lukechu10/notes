@@ -924,12 +924,13 @@ Since this is a reduction from a quantum randomized class to a classical randomi
 We have the following definition of classical, randomized, Turing reductions for distributional problems.
 
 #definition[Randomized, errorless, average-case reduction][
-  A distributional problem $(L, D)$ is _randomized, errorless, average-case, Turing reducible_ to $(K, nu)$ if $exists$ a randomized polynomial-time Turing machine $R^K (x; delta; r)$ equiped with an oracle for $K$ and a random tape $r$ such that:
+  A distributional problem $(L, D)$ is _randomized, errorless, average-case, Turing reducible_ to $(K, nu)$ if $exists$ a randomized polynomial-time Turing machine $R^K (x; delta; r)$ equipped with an oracle for $K$ and a random tape $r$ such that:
   - (Effectiveness) $R(x; delta; r)$ runs in time bounded by some polynomial in $abs(x)/delta$, irrespective of the coin tosses represented by $r$ or the answers of the oracle.
-  - (Correctness) For the exact oracle $K$, we have $forall x in "Supp"(D_n), quad R^K (x; delta; r) in {L(x), bot}$
+  - (Correctness) For every $x in "Supp"(D_n)$ and every tape $r$, the exact-oracle computation returns a value in ${L(x), bot}$.
+  - (Query support) On each such computation, every query $y$ belongs to $"Supp"(nu_(abs(y)))$. This is required even on exceptional inputs: the target scheme guarantees bounded error only on its support.
   - (Usefulness) $forall n, delta quad exists E_(n, delta) subset {0,1}^n$ such that $D_n (E_n) <= delta$ and $forall x in.not E_(n, delta)$ and $forall r$, we have $R^K (x; delta; r) = L(x)$.
   - (Domination) Let $"Ask"_(R^K)(x; delta; r; y)$ be the indicator function for whether $R^K (x; delta; r)$ queries the oracle with input $y$. Then
-    $ sum_(x in {0,1}^n \\ E_n) D_n (x) EE_r ["Ask"_(R^K)(x; delta; r; y)] <= p(n/delta) nu_(m(n, delta))(y), $
+    $ sum_(x in {0,1}^n \\ E_(n, delta)) D_n (x) EE_r ["Ask"_(R^K)(x; delta; r; y)] <= p(n/delta) nu_(m(n, delta))(y), $
     where $p$ is some polynomial and $m$ is some polynomial describing the length of the oracle query $y$ as a function of the input length $n$ and the error parameter $delta$.
 
   We write $(L, D) <=_R (K, nu)$ to denote that $(L, D)$ is randomized, errorless, average-case, Turing reducible to $(K, nu)$.
@@ -939,40 +940,45 @@ Our goal is to show a collapse theorem for $(class.AvgBQP, class.PSamp)$ to $(cl
 The proof is slightly more involved than the corresponding case for $class.AvgP$ being closed under deterministic, errorless, average-case Turing reductions, since we need to account for two sources of randomness: the reduction's random queries and the $class.AvgBPP$ oracle's random answers.
 
 #theorem[
-  If $(L, D) <=_R (K, nu)$ and $(K, nu) in (class.AvgBPP, class.PSamp)$, then $(L, D) in (class.AvgBPP, class.PSamp)$.
+  If $D in class.PSamp$, $(L, D) <=_R (K, nu)$, and $(K, nu) in (class.AvgBPP, class.PSamp)$, then $(L, D) in (class.AvgBPP, class.PSamp)$.
 ]
 
-#proof[Proof sketch][
-  Our goal is to construct a classical, randomized, algorithm $A(x; delta)$, running in $"poly"(n/delta)$ such that:
+#proof[
+  Our goal is to construct a classical, randomized algorithm $A(x; delta)$, running in $"poly"(n/delta)$ such that:
   $
-    forall x, quad Pr_A (A(x; delta) in.not {L(x), bot}) & <= 1/4, \
-      Pr_(x tilde D_n) (Pr_A (A(x; delta) = bot) >= 1/4) & <= delta.
+    forall x in "Supp"(D_n), quad Pr_A (A(x; delta) in.not {L(x), bot}) & <= 1/4, \
+      Pr_(x tilde D_n) (Pr_A (A(x; delta) = bot) >= 1/4) & < delta.
   $
 
-  Let $B(y; eta)$ be a $class.AvgBPP$ algorithm for $(K, nu)$. Let $H_m$ be the subset of $"Supp"(D_m)$ where $y in "Supp"(D_m), quad Pr_B (B(y; eta) >= 1/4)$. So $nu_m (H_m) <= eta$. We therefore have that $Pr_B (B(y; eta) = K(y)) > 1/2$.
+  Let $B(y; eta)$ be a $class.AvgBPP$ algorithm for $(K, nu)$. Let $H_m$ be the subset of $"Supp"(nu_m)$ where $Pr_B (B(y; eta) = bot) >= 1/4$. So $nu_m (H_m) < eta$. For every supported $y in.not H_m$, we therefore have $Pr_B (B(y; eta) = K(y)) > 1/2$.
 
-  First, amplify $B$. We do this by running $B$ for $s$ times and return the unique bit that appears at least $3s/8$ times. If no such bit exists, return $bot$. Denote the amplified algorithm as $hat(B)$. Since for the amplified algorithm to return an answer, the empirical frequency must rise from $1/4$ to $3/8$, We can now use Hoeffding's inequality to show that
-  $ Pr(hat(B)(y; eta) = not K(y)) <= exp(-s/32). $
-  For $y in.not H_n$, failure to return the correct bit requires the empirical frequency of the correct bit to drop from $1/2$ to $3/8$ or wrong bit's frequency to rise from $1/4$ to $3/8$, we have
+  First, amplify $B$. We do this by running $B$ independently $s$ times and returning the unique bit that appears at least $3s/8$ times. If no such unique bit exists, return $bot$. Denote the amplified algorithm as $hat(B)$. For the amplified algorithm to return the wrong bit on a supported query, its empirical frequency must rise from a mean of at most $1/4$ to at least $3/8$. We can now use Hoeffding's inequality to show that
+  $ Pr(hat(B)(y; eta) = 1 - K(y)) <= exp(-s/32). $
+  For supported $y in.not H_m$, failure to return the correct bit requires its empirical frequency to drop below $3/8$ or the wrong bit's frequency to rise to at least $3/8$. Thus
   $ Pr(hat(B)(y; eta) != K(y)) <= 2 exp(-s/32). $
 
-  Choose $s=ceil(32 log(128q))$, where $q$ is the upper-bound on the number of oracle queries. So both probabilities are bounded by $alpha = 1/(64 q)$. Now, set $epsilon = delta/2, eta = delta/(64 p)$ where $epsilon$ is the parameter to the randomized reduction and $p(n)$ is the polnomial factor from the domination condition.
+  Set $epsilon = delta/2$ for the randomized reduction and choose $s=ceil(32 ln(128q))$, where $q >= 1$ is a polynomial upper bound on its number of oracle queries at tolerance $epsilon$. So both probabilities are bounded by $alpha = 1/(64q)$. Set $P = max(1,p(n/epsilon))$ and $eta = delta/(64P)$, using the domination factor at the same tolerance.
 
-  We can now define $A(x; delta)$ as running $R^K (x; epsilon)$ and replacing each oracle query with an independent execution of $hat(B)(dot, eta)$. If any call returns $bot$, then $A$ returns $bot$. Otherwise, it returns the answer of the reduction.
+  We can now define $A(x; delta)$ as running $R(x; epsilon; r)$ with a fresh random tape and replacing each oracle query with an independent execution of $hat(B)(dot, eta)$. If any call returns $bot$, then $A$ returns $bot$. Otherwise, it returns the answer of the reduction.
 
   Now we show that $A$ is a $class.AvgBPP$ algorithm.
 
-  - (Effectiveness) The running time of $A$ is polynomial in $n/delta$ since the reduction runs in polynomial time and each oracle query is replaced by $s$ executions of $B$, which is also polynomial in $n/delta$.
-  - (Correctness) We use the fact that both probabilities are bounded by $alpha = 1/(64 q)$. By an union bound over the $q$ oracle queries, we have
+  - (Effectiveness) The running time of $A$ is polynomial in $n/delta$ since the reduction runs in polynomial time and each oracle query is replaced by $s$ executions of $B$, with query length and $1/eta$ polynomially bounded in $n/delta$.
+  - (Correctness) Fix a supported input $x$ and a tape $r$. Until an abort or the first wrong oracle answer, the simulation follows the exact-oracle path, whose queries are all supported. Without a wrong answer, $A$ returns either $bot$ or the exact reduction's answer. By a union bound over the at most $q$ queries on that path, and then averaging over $r$, we have
     $ Pr(A(x; delta) in.not {L(x), bot}) <= q alpha = 1/64 < 1/4. $
-  - (Usefulness) Define $h(x) = Pr_r (R^K (x; epsilon; r) "queries at least one member of" H)$ where $H$, recall, is the exceptional input set for inputs $y$.
-    Domination gives us:
+  - (Usefulness) Write $E = E_(n,epsilon)$ and $m = m(n,epsilon)$. Define $h(x) = Pr_r (R^K (x; epsilon; r) "queries at least one member of" H_m)$. Domination gives us:
     $
-      sum_(x in.not E_n) D_n (x) h(x) & <= sum_(y in H_m) sum_(x in.not E_n) D_n (x) Pr_r ["Ask"_(R^K)(x; epsilon; r; y) = 1] \
-                                      & <=p(n/delta) nu_m (H_m) \
-                                      & <= p(n/delta) eta.
+      sum_(x in.not E) D_n (x) h(x) & <= sum_(y in H_m) sum_(x in.not E) D_n (x) Pr_r ["Ask"_(R^K)(x; epsilon; r; y) = 1] \
+                                      & <= P nu_m (H_m) <= P eta = delta/64.
     $
+    By Markov's inequality, inputs outside $E$ with $h(x) >= 1/8$ have total mass at most $8 P eta <= delta/8$. On any other supported input outside $E$, the exact reduction returns $L(x)$ on every tape. With probability $1-h(x)$ its path avoids $H_m$. On each such tape the probability that any simulated answer on that path differs from the exact answer is at most $q alpha$. Hence
+    $ Pr_A (A(x; delta) = bot) <= h(x) + q alpha < 1/8 + 1/64 < 1/4. $
+    The inputs on which abstention can reach $1/4$ therefore have mass at most $D_n(E) + delta/8 <= delta/2 + delta/8 < delta$, as required.
+
+  This proves $(L,D) in class.AvgBPP$, and $D in class.PSamp$ by hypothesis.
 ]
+
+Consequently, once $(K, nu)$ is shown complete for $(class.AvgBQP, class.PSamp)$ under this reduction, a classical $class.AvgBPP$ scheme for $(K, nu)$ would put every member of $(class.AvgBQP, class.PSamp)$ in $(class.AvgBPP, class.PSamp)$. The reverse inclusion follows by simulating a classical randomized algorithm on a quantum computer.
 
 === Decision problem
 
