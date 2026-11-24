@@ -896,6 +896,21 @@ Classical probabilities, after all, can also be described by a state vector in s
 - Quantize the inputs $x in {0,1}^n -> rho in cal(M)(CC^(2^n))$.
 - Quantize search to decision
 
+== The Complexity Class $class.AvgBQP$
+
+We quantize only the algorithm in @def:AvgBPP. The input $x$ is still a classical string, and the algorithm returns a classical bit or the failure symbol $bot$.
+
+#definition[The class $class.AvgBQP$][
+  A distributional problem $(L, D)$ is in $class.AvgBQP$ if there exists a uniform quantum algorithm $A(x; delta)$ with outputs in ${0, 1, bot}$ such that for every input length $n$ and tolerance $0 < delta <= 1$:
+  - (Effectiveness) On every $n$-bit input, $A(x; delta)$ runs in time $"poly"(n/delta)$.
+  - (Correctness) For every $x in "Supp"(D_n)$, $Pr_A (A(x; delta) in.not {L(x), bot}) <= 1/4$.
+  - (Usefulness) $Pr_(x tilde D_n) (Pr_A (A(x; delta) = bot) >= 1/4) < delta$.
+
+  Here $Pr_A$ is over the outcomes of the quantum computation on a fixed input. Only the outer probability in the usefulness condition is over the draw of $x$ from $D_n$.
+]<def:AvgBQP>
+
+The definition does not require an efficient sampler for $D$. In $(class.AvgBQP, class.PSamp)$ we additionally require that $D$ be samplable in classical probabilistic polynomial time.
+
 == Generalization of completeness result of $class.AvgBPP$ to $class.AvgBQP$
 
 We first quantize the algorithm. Our goal is to show that there is a complete problem for $(class.AvgBQP, class.PSamp)$, i.e. the distributional class of problems where the algorithm is a quantum randomized errorless heuristic scheme and the sampler is a classical polynomial-time sampler.
@@ -957,8 +972,6 @@ The proof is slightly more involved than the corresponding case for $class.AvgP$
                                       & <=p(n/delta) nu_m (H_m) \
                                       & <= p(n/delta) eta.
     $
-
-
 ]
 
 === Decision problem
