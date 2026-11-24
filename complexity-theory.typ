@@ -952,12 +952,18 @@ The proof is slightly more involved than the corresponding case for $class.AvgP$
 
   Let $B(y; eta)$ be a $class.AvgBPP$ algorithm for $(K, nu)$. Let $H_m$ be the subset of $"Supp"(nu_m)$ where $Pr_B (B(y; eta) = bot) >= 1/4$. So $nu_m (H_m) < eta$. For every supported $y in.not H_m$, we therefore have $Pr_B (B(y; eta) = K(y)) > 1/2$.
 
-  First, amplify $B$. We do this by running $B$ independently $s$ times and returning the unique bit that appears at least $3s/8$ times. If no such unique bit exists, return $bot$. Denote the amplified algorithm as $hat(B)$. For the amplified algorithm to return the wrong bit on a supported query, its empirical frequency must rise from a mean of at most $1/4$ to at least $3/8$. We can now use Hoeffding's inequality to show that
-  $ Pr(hat(B)(y; eta) = 1 - K(y)) <= exp(-s/32). $
-  For supported $y in.not H_m$, failure to return the correct bit requires its empirical frequency to drop below $3/8$ or the wrong bit's frequency to rise to at least $3/8$. Thus
-  $ Pr(hat(B)(y; eta) != K(y)) <= 2 exp(-s/32). $
+  First, amplify $B$. Choose any fixed rational threshold $1/4 < tau < 1/2$. These endpoints come from the preceding bounds: the wrong bit has probability at most $1/4$ on every supported query, while the correct bit has probability greater than $1/2$ on a good query. Run $B$ independently $s$ times and return the unique bit whose empirical frequency is at least $tau$; if there is no unique such bit, return $bot$. Denote this algorithm by $hat(B)$.
 
-  Set $epsilon = delta/2$ for the randomized reduction and choose $s=ceil(32 ln(128q))$, where $q >= 1$ is a polynomial upper bound on its number of oracle queries at tolerance $epsilon$. So both probabilities are bounded by $alpha = 1/(64q)$. Set $P = max(1,p(n/epsilon))$ and $eta = delta/(64P)$, using the domination factor at the same tolerance.
+  Write $g = min(tau - 1/4, 1/2 - tau)$. Returning the wrong bit requires an upward deviation of at least $g$. On a good query, failing to return the correct bit requires either that deviation or a downward deviation of at least $g$ for the correct bit. Hoeffding's inequality therefore gives
+  $
+    Pr(hat(B)(y; eta) = 1 - K(y)) & <= exp(-2s g^2) && "on every supported query", \
+    Pr(hat(B)(y; eta) != K(y)) & <= 2 exp(-2s g^2) && "on every good query".
+  $
+  The midpoint $tau = 3/8$ maximizes the smaller gap: $g = 1/8$, giving the exponent $-s/32$.
+
+  There are two distinct budgets. First, on a typical input we need the probability of abstention to be below $1/4$. Choose fixed positive rational constants $a,b$ with $a+b <= 1/4$: allow probability $a$ for simulation failures along a good path and $b$ for drawing a tape whose path visits $H_m$. If $q >= 1$ bounds the number of queries, it suffices to make each amplified failure probability at most $alpha = a/q$. Take $s = ceil(ln(2q/a)/(2g^2))$. For example, $a=1/64$ and $tau=3/8$ recover $s=ceil(32 ln(128q))$.
+
+  Second, the exceptional *input mass* must be less than $delta$. Run the reduction at $epsilon=delta/2$, reserving the other half for inputs that too often query $H_m$. Here $q$ is evaluated at $epsilon$, and $P=max(1,p(n/epsilon))$. Domination followed by Markov will charge at most $P eta/b$ input mass for those frequent visits, so choose $eta=b(delta-epsilon)/(2P)$. The extra factor of two just leaves slack for the strict inequality; the same argument works with $epsilon$ any fixed fraction of $delta$ strictly between zero and one.
 
   We can now define $A(x; delta)$ as running $R(x; epsilon; r)$ with a fresh random tape and replacing each oracle query with an independent execution of $hat(B)(dot, eta)$. If any call returns $bot$, then $A$ returns $bot$. Otherwise, it returns the answer of the reduction.
 
@@ -965,15 +971,15 @@ The proof is slightly more involved than the corresponding case for $class.AvgP$
 
   - (Effectiveness) The running time of $A$ is polynomial in $n/delta$ since the reduction runs in polynomial time and each oracle query is replaced by $s$ executions of $B$, with query length and $1/eta$ polynomially bounded in $n/delta$.
   - (Correctness) Fix a supported input $x$ and a tape $r$. Until an abort or the first wrong oracle answer, the simulation follows the exact-oracle path, whose queries are all supported. Without a wrong answer, $A$ returns either $bot$ or the exact reduction's answer. By a union bound over the at most $q$ queries on that path, and then averaging over $r$, we have
-    $ Pr(A(x; delta) in.not {L(x), bot}) <= q alpha = 1/64 < 1/4. $
+    $ Pr(A(x; delta) in.not {L(x), bot}) <= q alpha = a < 1/4. $
   - (Usefulness) Write $E = E_(n,epsilon)$ and $m = m(n,epsilon)$. Define $h(x) = Pr_r (R^K (x; epsilon; r) "queries at least one member of" H_m)$. Domination gives us:
     $
       sum_(x in.not E) D_n (x) h(x) & <= sum_(y in H_m) sum_(x in.not E) D_n (x) Pr_r ["Ask"_(R^K)(x; epsilon; r; y) = 1] \
-                                      & <= P nu_m (H_m) <= P eta = delta/64.
+                                      & <= P nu_m (H_m) <= P eta.
     $
-    By Markov's inequality, inputs outside $E$ with $h(x) >= 1/8$ have total mass at most $8 P eta <= delta/8$. On any other supported input outside $E$, the exact reduction returns $L(x)$ on every tape. With probability $1-h(x)$ its path avoids $H_m$. On each such tape the probability that any simulated answer on that path differs from the exact answer is at most $q alpha$. Hence
-    $ Pr_A (A(x; delta) = bot) <= h(x) + q alpha < 1/8 + 1/64 < 1/4. $
-    The inputs on which abstention can reach $1/4$ therefore have mass at most $D_n(E) + delta/8 <= delta/2 + delta/8 < delta$, as required.
+    By Markov's inequality, inputs outside $E$ with $h(x) >= b$ have total mass at most $P eta/b = (delta-epsilon)/2$. On any other supported input outside $E$, the exact reduction returns $L(x)$ on every tape. With probability $1-h(x)$ its path avoids $H_m$. On each such tape the probability that any simulated answer on that path differs from the exact answer is at most $q alpha$. Hence
+    $ Pr_A (A(x; delta) = bot) <= h(x) + q alpha < b + a <= 1/4. $
+    The inputs on which abstention can reach $1/4$ therefore have mass at most $D_n(E) + P eta/b <= epsilon + (delta-epsilon)/2 < delta$, as required.
 
   This proves $(L,D) in class.AvgBPP$, and $D in class.PSamp$ by hypothesis.
 ]
