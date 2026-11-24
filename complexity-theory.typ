@@ -947,7 +947,7 @@ The proof is slightly more involved than the corresponding case for $class.AvgP$
   Our goal is to construct a classical, randomized algorithm $A(x; delta)$, running in $"poly"(n/delta)$ such that:
   $
     forall x in "Supp"(D_n), quad Pr_A (A(x; delta) in.not {L(x), bot}) & <= 1/4, \
-      Pr_(x tilde D_n) (Pr_A (A(x; delta) = bot) >= 1/4) & < delta.
+                     Pr_(x tilde D_n) (Pr_A (A(x; delta) = bot) >= 1/4) & < delta.
   $
 
   Let $B(y; eta)$ be a $class.AvgBPP$ algorithm for $(K, nu)$. Let $H_m$ be the subset of $"Supp"(nu_m)$ where $Pr_B (B(y; eta) = bot) >= 1/4$. So $nu_m (H_m) < eta$. For every supported $y in.not H_m$, we therefore have $Pr_B (B(y; eta) = K(y)) > 1/2$.
@@ -956,14 +956,14 @@ The proof is slightly more involved than the corresponding case for $class.AvgP$
 
   Write $g = min(tau - 1/4, 1/2 - tau)$. Returning the wrong bit requires an upward deviation of at least $g$. On a good query, failing to return the correct bit requires either that deviation or a downward deviation of at least $g$ for the correct bit. Hoeffding's inequality therefore gives
   $
-    Pr(hat(B)(y; eta) = 1 - K(y)) & <= exp(-2s g^2) && "on every supported query", \
-    Pr(hat(B)(y; eta) != K(y)) & <= 2 exp(-2s g^2) && "on every good query".
+    Pr(hat(B)(y; eta) = 1 - K(y)) & <= exp(-2s g^2)   && "on every supported query", \
+       Pr(hat(B)(y; eta) != K(y)) & <= 2 exp(-2s g^2) && "on every good query".
   $
   The midpoint $tau = 3/8$ maximizes the smaller gap: $g = 1/8$, giving the exponent $-s/32$.
 
   There are two distinct budgets. First, on a typical input we need the probability of abstention to be below $1/4$. Choose fixed positive rational constants $a,b$ with $a+b <= 1/4$: allow probability $a$ for simulation failures along a good path and $b$ for drawing a tape whose path visits $H_m$. If $q >= 1$ bounds the number of queries, it suffices to make each amplified failure probability at most $alpha = a/q$. Take $s = ceil(ln(2q/a)/(2g^2))$. For example, $a=1/64$ and $tau=3/8$ recover $s=ceil(32 ln(128q))$.
 
-  Second, the exceptional *input mass* must be less than $delta$. Run the reduction at $epsilon=delta/2$, reserving the other half for inputs that too often query $H_m$. Here $q$ is evaluated at $epsilon$, and $P=max(1,p(n/epsilon))$. Domination followed by Markov will charge at most $P eta/b$ input mass for those frequent visits, so choose $eta=b(delta-epsilon)/(2P)$. The extra factor of two just leaves slack for the strict inequality; the same argument works with $epsilon$ any fixed fraction of $delta$ strictly between zero and one.
+  Second, the exceptional *input mass* must be less than $delta$. Run the reduction at $epsilon=delta/2$, reserving the other half for inputs that too often query $H_m$. Here $q$ is evaluated at $epsilon$, and $P=max(1, p(n/epsilon))$. Domination followed by Markov will charge at most $P eta/b$ input mass for those frequent visits, so choose $eta=b(delta-epsilon)/(2P)$. The extra factor of two just leaves slack for the strict inequality; the same argument works with $epsilon$ any fixed fraction of $delta$ strictly between zero and one.
 
   We can now define $A(x; delta)$ as running $R(x; epsilon; r)$ with a fresh random tape and replacing each oracle query with an independent execution of $hat(B)(dot, eta)$. If any call returns $bot$, then $A$ returns $bot$. Otherwise, it returns the answer of the reduction.
 
@@ -975,7 +975,7 @@ The proof is slightly more involved than the corresponding case for $class.AvgP$
   - (Usefulness) Write $E = E_(n,epsilon)$ and $m = m(n,epsilon)$. Define $h(x) = Pr_r (R^K (x; epsilon; r) "queries at least one member of" H_m)$. Domination gives us:
     $
       sum_(x in.not E) D_n (x) h(x) & <= sum_(y in H_m) sum_(x in.not E) D_n (x) Pr_r ["Ask"_(R^K)(x; epsilon; r; y) = 1] \
-                                      & <= P nu_m (H_m) <= P eta.
+                                    & <= P nu_m (H_m) <= P eta.
     $
     By Markov's inequality, inputs outside $E$ with $h(x) >= b$ have total mass at most $P eta/b = (delta-epsilon)/2$. On any other supported input outside $E$, the exact reduction returns $L(x)$ on every tape. With probability $1-h(x)$ its path avoids $H_m$. On each such tape the probability that any simulated answer on that path differs from the exact answer is at most $q alpha$. Hence
     $ Pr_A (A(x; delta) = bot) <= h(x) + q alpha < b + a <= 1/4. $
@@ -1011,7 +1011,8 @@ The second query matters: a no answer for $C_1$ need not be evidence for $0$; th
 
 == Quantum XOR Games
 
-#set heading(numbering: none)
+#pagebreak()
+#show heading.where(level: 1): it => it.body;
 = Appendix A. Probability Theory
 
 == Markov's Inequality
@@ -1075,11 +1076,11 @@ The clock and trial count make this a polynomial-time sampler. Two consequences 
 ]
 
 #proof[Hardness][
-  Fix a source problem $(L,D)$, its $class.AvgBPP$ scheme $A$, and its classical sampler $S$. On input $x$ of length $n$ and tolerance $delta$, set $k=ceil(log_2(1/delta))$ and $epsilon=2^(-k)$, so $delta/2 < epsilon <= delta$. For each $b in {0,1}$, construct a circuit $C_b(x)$ with random input wires $r$ whose output is $1$ exactly when $A(x;epsilon;r)=b$. This is a uniform polynomial-time construction: unroll the clocked computation of $A$ into a Boolean circuit, hardwire $x$ and $epsilon$, and leave its random tape as input wires.
+  Fix a source problem $(L,D)$, its $class.AvgBPP$ scheme $A$, and its classical sampler $S$. On input $x$ of length $n$ and tolerance $delta$, set $k=ceil(log_2(1/delta))$ and $epsilon=2^(-k)$, so $delta/2 < epsilon <= delta$. For each $b in {0,1}$, construct a circuit $C_b (x)$ with random input wires $r$ whose output is $1$ exactly when $A(x;epsilon;r)=b$. This is a uniform polynomial-time construction: unroll the clocked computation of $A$ into a Boolean circuit, hardwire $x$ and $epsilon$, and leave its random tape as input wires.
 
-  Choose a common padding size $N$ as below and use the fixed threshold $v(t)=3/8$ in both queries $Q_b(x)=(C_b(x),t)$. Return the bit whose query is accepted if there is exactly one; otherwise abstain. On any supported input the wrong bit has probability at most $1/4$, so its query is always rejected. Let $E$ consist of inputs on which $A(x;epsilon)$ abstains with probability at least $1/4$, together with the unsupported inputs. Its mass is less than $epsilon <= delta$. Outside $E$ the correct bit has probability greater than $1/2$, so its query is accepted. Crucially, on these inputs *both* query circuits are at distance at least $1/8$ from the threshold: the wrong one below it, the correct one above it.
+  Choose a common padding size $N$ as below and use the fixed threshold $v(t)=3/8$ in both queries $Q_b(x)=(C_b (x),t)$. Return the bit whose query is accepted if there is exactly one; otherwise abstain. On any supported input the wrong bit has probability at most $1/4$, so its query is always rejected. Let $E$ consist of inputs on which $A(x;epsilon)$ abstains with probability at least $1/4$, together with the unsupported inputs. Its mass is less than $epsilon <= delta$. Outside $E$ the correct bit has probability greater than $1/2$, so its query is accepted. Crucially, on these inputs *both* query circuits are at distance at least $1/8$ from the threshold: the wrong one below it, the correct one above it.
 
-  *Padding.* Take the fixed generator $G$ that samples $x$ using $S(1^n)$, chooses a fair bit $b$, and outputs the unpadded circuit $C_b(x)$ using the reduction's compiler. Choose $N >= max(3,n,k)$ as a computable polynomial bound in $n+2^k$ large enough for this generator's worst-case running time, the circuit fields, and the triple's prefix code. Thus $N$ depends only on $n,k$, both queries have length $2N$, and constructing them takes deterministic polynomial time in $n/delta$. The reduction only writes down descriptions; it never samples $x$, $b$, or a circuit assignment.
+  *Padding.* Take the fixed generator $G$ that samples $x$ using $S(1^n)$, chooses a fair bit $b$, and outputs the unpadded circuit $C_b (x)$ using the reduction's compiler. Choose $N >= max(3, n, k)$ as a computable polynomial bound in $n+2^k$ large enough for this generator's worst-case running time, the circuit fields, and the triple's prefix code. Thus $N$ depends only on $n,k$, both queries have length $2N$, and constructing them takes deterministic polynomial time in $n/delta$. The reduction only writes down descriptions; it never samples $x$, $b$, or a circuit assignment.
 
   *Domination.* In the target sampler, the generator branch has probability at least $1/2$, the desired triple is selected with probability $lambda$ in that branch, and either bit is chosen with probability $1/2$. For $x$ outside $E$ either query passes the filter with probability at least $1/2$. Hence for every query string $y$ of length $2N$,
   $ nu_(2N)(y) >= lambda/8 sum_(x in.not E) D_n(x) sum_(b in {0,1}) bold(1)[Q_b(x)=y]. $
