@@ -988,14 +988,13 @@ Consequently, once $(K, nu)$ is shown complete for $(class.AvgBQP, class.PSamp)$
 
 === Decision problem
 
-An instance is $(1^N, C, j)$ where $C$ is a quantum circuit of description length at most $N$, with at most $N$ gates and qubits, and $j in {0, ..., 2^N-1}$. Define
+#definition[Quantum circuit acceptance above a binary threshold][
+  An instance is a pair $(C,t)$, where $t = t_1 dots t_N$ is a nonempty bit string and $C$ is a quantum circuit over the Hadamard, $T$, and CNOT gates with a designated output qubit. The circuit description length, gate count, and qubit count are each at most $N$.
 
-$ p_c = Pr(C(0...0) "outputs" 1), quad theta_(N,j)=1/3+j/(12 dot 2^N). $
-
-The _total decision problem_ is defined by the characteristic function
-$ K(1^N, C, j) = cases(1","quad &"if" p_c > theta_(N,j), 0","quad &"if" p_c <= theta_(N,j)). $
-
-Malformed instances have answer $0$.
+  Interpret $t$ as a binary fraction with value $v(t) = sum_(i=1)^N t_i 2^(-i)$. Let $p_C$ be the probability of measuring $1$ on the output qubit after running $C$ with all qubits initialized to $0$. The pair belongs to $K$ exactly when
+  $ p_C > v(t). $
+  This is a total decision problem: no gap between $p_C$ and $v(t)$ is promised. Equality and malformed encodings are both rejected.
+]
 
 = Examples of Quantum Average Case Complexity
 
