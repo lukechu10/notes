@@ -996,6 +996,15 @@ Consequently, once $(K, nu)$ is shown complete for $(class.AvgBQP, class.PSamp)$
   This is a total decision problem: no gap between $p_C$ and $v(t)$ is promised. Equality and malformed encodings are both rejected.
 ]
 
+Why should every problem in $class.AvgBQP$ reduce to $K$? Set domination aside for now. Given a source scheme $A$, an input $x$, and a tolerance $delta$, we would like to ask whether $A(x;delta)$ returns a particular bit often enough that we can trust it. For each $b in {0,1}$, construct a circuit $C_b$ that runs $A(x;delta)$ and accepts exactly when its output is $b$. By uniformity we can construct the circuit descriptions in classical polynomial time in $abs(x)/delta$; we do not need to run the circuits to make the queries.
+
+Ask $K$ about both circuits at the fixed threshold $1/4$ (use the threshold string `01`, padded on the right with zeros to the required length). If exactly one circuit passes, return its bit; otherwise return $bot$.
+
+- On every supported input, the wrong bit has probability at most $1/4$. Since $K$ tests for a *strict* inequality, that bit never passes.
+- On any input where $A$ abstains with probability less than $1/4$, the correct bit has probability greater than $1 - 1/4 - 1/4 = 1/2$. It therefore passes. By usefulness of $A$, the inputs not covered by this guarantee have mass less than $delta$ under $D_n$.
+
+The second query matters: a no answer for $C_1$ need not be evidence for $0$; the scheme might simply abstain most of the time. Asking about $C_0$ lets the reduction return $0$ only when there is evidence for it. Thus the exact oracle gives a correct bit or an abstention, and a fixed threshold already suffices for this argument. The reason to randomize the threshold in the distributional reduction is to obtain domination, not correctness.
+
 = Examples of Quantum Average Case Complexity
 
 == Random Hamiltonian Simulation
@@ -1033,6 +1042,48 @@ TODO
 
 #proof[
   TODO
+]
+
+= Appendix B. A complete circuit acceptance problem for $class.AvgBPP$
+
+A Boolean circuit with fair random input bits is a bounded randomized computation. Asking whether its acceptance probability exceeds a supplied threshold therefore gives a circuit analogue of bounded halting. Here we prove completeness under the *deterministic* errorless distributional Turing reduction of @def:deterministic-turing-reduction-avgP. The reduction asks two fixed-threshold queries. As in the earlier bounded-machine construction, it is the classical sampler, not the reduction, that tests candidate instances.
+
+== The language and its distribution
+
+At length $2N$, split the instance into two $N$-bit fields. The first contains a self-delimiting description of a single-output Boolean circuit $C$, marked by an initial `1` and padded on the right with zeros. An all-zero field is therefore invalid. Allow at most $N$ input wires and $N$ gates. The second field is a threshold $t$ with binary value $v(t)=sum_(i=1)^N t_i 2^(-i)$. For a circuit with $d$ input wires, put
+$ p_C = 2^(-d) abs({r in {0,1}^d : C(r)=1}). $
+The language $K_("cl")$ accepts exactly the valid pairs with $p_C > v(t)$. Ties and malformed instances (including odd lengths) are rejected.
+
+The reduction will always use the threshold $3/8$, halfway between the source scheme's wrong-bit bound $1/4$ and its good-input correct-bit bound $1/2$. Thus we want the sampler to give weight to this particular threshold, but not to concentrate on circuits whose acceptance probabilities are nearly $3/8$. Define $nu$ as follows:
+
++ At odd lengths or $N<3$, output the all-zero string. Otherwise, with probability $2^(-N)$ output a uniform $2N$-bit string and stop. This small branch ensures full query support even on exceptional source inputs.
++ Draw $N$ fair bits and try to read a prefix coding a triple $(G,n,k)$: a classical randomized program and two nonnegative integers. Use a fixed prefix-free program code and self-delimiting binary integer codes of length $O(log(u+2))$ for integer $u$. Ignore unused suffix bits. Run $G(n,k)$ with fresh coins for at most $N$ steps to generate a circuit. On timeout, invalid code, or a circuit that does not fit, output the all-zero string.
++ *Filter the circuit.* Estimate $p_C$ by the fraction $hat(p)$ of accepting trials on fresh independent assignments. Use $s=ceil(512(N+1) ln 2)$ trials, so by @thm:Hoeffding-inequality the probability that $abs(hat(p)-p_C) >= 1/32$ is at most $2^(-N)$. If $abs(hat(p)-3/8) >= 3/32$, output the padded circuit with threshold `011` followed by zeros. Otherwise output the all-zero string.
+
+The clock and trial count make this a polynomial-time sampler. Two consequences of the filter will be used below. A circuit within $1/16$ of $3/8$ passes with probability at most $2^(-N)$; one at distance at least $1/8$ passes with probability at least $1-2^(-N)$. In each case, violating the intended outcome requires an estimation error of at least $1/32$. Also, if the triple has code length $ell <= N$, its selection probability in the generator branch is $lambda=2^(-ell)$. For fixed $G$ and $n,k <= N$, $ell = O_G(1) + O(log(N+2))$, so $1/lambda$ is polynomial in $N$.
+
+#theorem[
+  $(K_("cl"),nu)$ is complete for $(class.AvgBPP,class.PSamp)$ under deterministic errorless distributional Turing reductions, even with just two nonadaptive queries.
+]
+
+#proof[Membership][
+  Reject malformed instances immediately. At tolerance $eta <= 2 dot 2^(-N)$, compare the number of accepting assignments with the threshold exactly: $2^d <= 2^N <= 2/eta$, so enumeration takes polynomial time in $N/eta$.
+
+  Otherwise, use a constant number of independent trials sufficient by Hoeffding to estimate $p_C$ to within $1/32$ with failure probability at most $1/16$. Return the sign of the comparison with $v(t)$, interpreted as a bit, only if the estimate differs from $v(t)$ by more than $1/32$; otherwise abstain. On every instance a wrong bit requires a failed estimate. On every valid instance with $abs(p_C-v(t))>1/16$, abstention also requires a failed estimate.
+
+  The mass of valid instances within $1/16$ of their threshold is at most $2 dot 2^(-N)$: the uniform branch contributes at most its entire mass $2^(-N)$, and in the generator branch every such candidate survives the filter with probability at most $2^(-N)$. The fallback string is malformed and is never a cause of abstention. Thus the exceptional mass is strictly less than $eta$ in this branch. This proves correctness, usefulness, and polynomial running time.
+]
+
+#proof[Hardness][
+  Fix a source problem $(L,D)$, its $class.AvgBPP$ scheme $A$, and its classical sampler $S$. On input $x$ of length $n$ and tolerance $delta$, set $k=ceil(log_2(1/delta))$ and $epsilon=2^(-k)$, so $delta/2 < epsilon <= delta$. For each $b in {0,1}$, construct a circuit $C_b(x)$ with random input wires $r$ whose output is $1$ exactly when $A(x;epsilon;r)=b$. This is a uniform polynomial-time construction: unroll the clocked computation of $A$ into a Boolean circuit, hardwire $x$ and $epsilon$, and leave its random tape as input wires.
+
+  Choose a common padding size $N$ as below and use the fixed threshold $v(t)=3/8$ in both queries $Q_b(x)=(C_b(x),t)$. Return the bit whose query is accepted if there is exactly one; otherwise abstain. On any supported input the wrong bit has probability at most $1/4$, so its query is always rejected. Let $E$ consist of inputs on which $A(x;epsilon)$ abstains with probability at least $1/4$, together with the unsupported inputs. Its mass is less than $epsilon <= delta$. Outside $E$ the correct bit has probability greater than $1/2$, so its query is accepted. Crucially, on these inputs *both* query circuits are at distance at least $1/8$ from the threshold: the wrong one below it, the correct one above it.
+
+  *Padding.* Take the fixed generator $G$ that samples $x$ using $S(1^n)$, chooses a fair bit $b$, and outputs the unpadded circuit $C_b(x)$ using the reduction's compiler. Choose $N >= max(3,n,k)$ as a computable polynomial bound in $n+2^k$ large enough for this generator's worst-case running time, the circuit fields, and the triple's prefix code. Thus $N$ depends only on $n,k$, both queries have length $2N$, and constructing them takes deterministic polynomial time in $n/delta$. The reduction only writes down descriptions; it never samples $x$, $b$, or a circuit assignment.
+
+  *Domination.* In the target sampler, the generator branch has probability at least $1/2$, the desired triple is selected with probability $lambda$ in that branch, and either bit is chosen with probability $1/2$. For $x$ outside $E$ either query passes the filter with probability at least $1/2$. Hence for every query string $y$ of length $2N$,
+  $ nu_(2N)(y) >= lambda/8 sum_(x in.not E) D_n(x) sum_(b in {0,1}) bold(1)[Q_b(x)=y]. $
+  The inner sum is at least the indicator that the reduction asks $y$, even when the queries coincide. Rearranging proves domination with factor $8/lambda$, polynomial in $n/delta$. The exceptional inputs need not pass the filter often: their queries still have support by the uniform branch, and domination is required only outside $E$.
 ]
 
 #let bib = ```bib
