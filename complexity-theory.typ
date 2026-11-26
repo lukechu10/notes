@@ -1045,7 +1045,64 @@ TODO
   TODO
 ]
 
-= Appendix B. A complete circuit acceptance problem for $class.AvgBPP$
+= Appendix B. Levin's universal search
+
+Suppose someone has written a fast SAT solver, but we are not told which program it is. On a satisfiable formula we can still benefit from that solver: run many candidate programs, give each a share of the time, and check any assignment they return. We need not recognize a correct *solver*; we need only recognize a correct *solution*. Levin's universal search @Levin_1973 makes this idea precise.
+
+== The search procedure
+
+#definition[Verifiable search problem][
+  Fix a deterministic verifier $V(x,y)$. On input $x$, the task is to return any witness $y$ for which $V(x,y)=1$, if one exists. For SAT, $y$ is a truth assignment and $V$ evaluates the given formula $x$ on that assignment.
+]
+
+Fix a universal interpreter and a prefix-free program encoding. Give program $p$ weight $w_p=2^(-abs(p))$, where $abs(p)$ is its encoded length. Prefix-freeness ensures that the weights sum to at most one. We can therefore treat each weight as a share of one time budget.
+
+#algorithm[Levin's universal search][
+  On input $x$, run phases $i=0,1,2,dots$ until a witness is found. In phase $i$:
+  + Set $B=2^i$. List the programs $p$ with $abs(p) <= i$.
+  + For each such $p$, start $p(x)$ from scratch with $floor(B w_p)$ steps. If it returns a candidate $y$, use the remainder of *that same allocation* to check $V(x,y)$.
+  + If the check accepts, return $y$ and stop. Otherwise, including when the allocation expires, continue the schedule.
+]
+
+Measure simulation and verification in steps of the fixed interpreter. Use an encoding whose eligible programs can be listed in $O(B)$ time per phase. For example, prefix a binary program body of length $k$ by $k$ ones and a zero. The resulting length is $2k+1$, so at budget $2^i$ we need only enumerate bodies of length at most $(i-1)/2$.
+
+== What universality guarantees
+
+#theorem[Instance-wise search bound][
+  If program $p$ produces a valid witness on $x$, and $T_p (x)$ is the time to produce *and verify* it, then universal search returns a valid witness within time
+  $ T_("search")(x) = O(2^(abs(p)) T_p (x)). $
+]
+
+#proof[
+  Take the first phase with $B >= T_p (x)/w_p$. The allocation for $p$ is now sufficient, so the search succeeds no later than this phase. Each phase costs $O(B)$: listing programs fits in this bound, and their allocations sum to at most $B$. Since the budgets double, all earlier budgets together sum to less than the last. Thus total time is $O(T_p (x)/w_p)$, as claimed.
+]
+
+#remark[
+  - *Optimality for each input.* The bound holds for every successful program on this particular $x$, without knowing which program is fastest. For a fixed polynomial-time witness finder with polynomial-time checking, the overhead is a constant factor independent of $x$.
+  - *No false witnesses, but no certificate of failure.* Only verified witnesses are returned. If a witness exists, even a program that just prints it eventually gets enough time. If none exists, the search runs forever: a long wait does not certify unsatisfiability.
+  - *Dependence on the encoding.* Each extra program bit halves its time share. The factor can be enormous, and the guarantee does not turn an exponential-time solver into a polynomial-time one.
+]
+
+== From a share of time to a share of probability
+
+In search we do not know which solver to run. In the next appendix we do not know which generator's outputs the reduction will need. Instead of giving a program a share of *time*, give a generator a share of *probability*: a fair bit stream starts with its prefix-free code with probability $w_G=2^(-abs(G))$.
+
+#lemma[Domination by a mixture][
+  Suppose a sampler selects generator $G$ with probability $w_G>0$ and, conditional on that choice, samples from $D_G$. If $mu$ is its output distribution, then for every event $F$,
+  $ D_G (F) <= mu(F)/w_G. $
+]
+
+#proof[
+  Selecting $G$ and then producing an output in $F$ contributes $w_G D_G (F)$ to $mu(F)$. Other generators can only increase that mass.
+]
+
+The reciprocal weight has two readings: search takes at most a factor of order $1/w_G$ longer than a particular program, while an event is at most $1/w_G$ times as likely under a particular generator as under the mixture.
+
+#remark[
+  The sampler in Appendix C is clocked and filtered, so the ideal mixture bound needs two adjustments. At scale $N$ it selects a triple $(G,n,k)$, not just $G$. For fixed $G$ and $n,k <= N$, the extra parameters cost $O(log N)$ bits, leaving the triple inverse-polynomial selection probability. Padding makes the clock long enough for the chosen generator. The filter then retains each query from a good source input with probability at least $1/2$. Thus filtering costs at most another factor of two on the queries for which domination is required; no such guarantee is needed for arbitrary outputs of $G$.
+]
+
+= Appendix C. A complete circuit acceptance problem for $class.AvgBPP$
 
 A Boolean circuit with fair random input bits is a bounded randomized computation. Asking whether its acceptance probability exceeds a supplied threshold therefore gives a circuit analogue of bounded halting. Here we prove completeness under the *deterministic* errorless distributional Turing reduction of @def:deterministic-turing-reduction-avgP. The reduction asks two fixed-threshold queries. As in the earlier bounded-machine construction, it is the classical sampler, not the reduction, that tests candidate instances.
 
@@ -1088,6 +1145,8 @@ The clock and trial count make this a polynomial-time sampler. Two consequences 
 ]
 
 #let bib = ```bib
+ @article{Levin_1973, author={Levin, Leonid A.}, title={Universal Sequential Search Problems}, journal={Problems of Information Transmission}, year={1973}, volume={9}, number={3}, pages={265–266}, url={https://www.mathnet.ru/eng/ppi914} }
+
  @book{Arora_Barak_2009, title={Computational Complexity}, author={Arora, Sanjeev and Barak, Boaz}, language={en}, year={2009}, isbn={9780521424264} }
 
  @article{Bogdanov_Trevisan_2021, title={Average-Case Complexity}, url={http://arxiv.org/abs/cs/0606037}, DOI={10.48550/arXiv.cs/0606037}, note={arXiv:cs/0606037}, number={arXiv:cs/0606037}, publisher={arXiv}, author={Bogdanov, Andrej and Trevisan, Luca}, year={2021}, month=aug, language={en} }
