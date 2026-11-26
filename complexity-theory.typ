@@ -1047,34 +1047,39 @@ TODO
 
 = Appendix B. Levin's universal search
 
-Suppose someone has written a fast SAT solver, but we are not told which program it is. On a satisfiable formula we can still benefit from that solver: run many candidate programs, give each a share of the time, and check any assignment they return. We need not recognize a correct *solver*; we need only recognize a correct *solution*. Levin's universal search @Levin_1973 makes this idea precise.
-
-== The search procedure
+Given some relation $V subset.eq X times Y$, there is some assosciated search problem: given $x in X$, find any $y in Y$ such that $V(x, y) = 1$.
 
 #definition[Verifiable search problem][
   Fix a deterministic verifier $V(x,y)$. On input $x$, the task is to return any witness $y$ for which $V(x,y)=1$, if one exists. For SAT, $y$ is a truth assignment and $V$ evaluates the given formula $x$ on that assignment.
 ]
 
-Fix a universal interpreter and a prefix-free program encoding. Give program $p$ weight $w_p=2^(-abs(p))$, where $abs(p)$ is its encoded length. Prefix-freeness ensures that the weights sum to at most one. We can therefore treat each weight as a share of one time budget.
+If this search problem is computable, i.e. if there exists some algorithm $p$ that finds a solution for every $x$ in the domain, then there is an algorithm that finds a solution for every $x$ in asymptotically optimal time. This is _Levin's universal search_ @Levin_1973.
+
+Fix a universal interpreter and a prefix-free program encoding. Give program $p$ weight $w_p=2^(-abs(p))$, where $abs(p)$ is its encoded length. Prefix-freeness ensures that the weights sum to at most one.
+#footnote[This is Kraft's inequality, whichs states that a binary language with codewords lengths $l_1, l_2, ... l_m$, there exists a prefix-free code with these lengths if and only if $sum_(i=0)^m 2^(-l_i) <= 1$.]
+We can therefore treat each weight as a share of one time budget.
 
 #algorithm[Levin's universal search][
   On input $x$, run phases $i=0,1,2,dots$ until a witness is found. In phase $i$:
-  + Set $B=2^i$. List the programs $p$ with $abs(p) <= i$.
-  + For each such $p$, start $p(x)$ from scratch with $floor(B w_p)$ steps. If it returns a candidate $y$, use the remainder of *that same allocation* to check $V(x,y)$.
+  + Set the budget $B=2^i$. List the programs $p$ with $abs(p) <= i$.
+  + For each such $p$, run $p(x)$ with $floor(B w_p)$ steps. If it returns a candidate $y$, use the remainder of *that same allocation* to check $V(x,y)$.
   + If the check accepts, return $y$ and stop. Otherwise, including when the allocation expires, continue the schedule.
 ]
 
-Measure simulation and verification in steps of the fixed interpreter. Use an encoding whose eligible programs can be listed in $O(B)$ time per phase. For example, prefix a binary program body of length $k$ by $k$ ones and a zero. The resulting length is $2k+1$, so at budget $2^i$ we need only enumerate bodies of length at most $(i-1)/2$.
+We measure simulation and verification in the fixed interpreter.
+Use an encoding whose eligible programs can be listed in $O(B)$ time per phase. For example, prefix a binary program body of length $k$ by $k$ ones and a zero. The resulting length is $2k+1$, so at budget $2^i$ we need only enumerate bodies of length at most $(i-1)/2$.
 
 == Properties of universal search
 
 #theorem[Instance-wise search bound][
-  If program $p$ produces a valid witness on $x$, and $T_p (x)$ is the time to produce *and verify* it, then universal search returns a valid witness within time
+  If there exists some program $p$ that produces a valid witness $y$ for $x$, and $T_p (x)$ is the time to produce *and verify* it, then universal search returns a valid witness within time
   $ T_("search")(x) = O(2^(abs(p)) T_p (x)). $
 ]
 
 #proof[
-  Take the first phase with $B >= T_p (x)/w_p$. The allocation for $p$ is now sufficient, so the search succeeds no later than this phase. Each phase costs $O(B)$: listing programs fits in this bound, and their allocations sum to at most $B$. Since the budgets double, all earlier budgets together sum to less than the last. Thus total time is $O(T_p (x)/w_p)$, as claimed.
+  For the time allocation to be sufficient, we need $B w_p >= T_p (x)$ or equivalently, $B >= (T_p (x))/w_p$.
+  Each phase costs $O(B)$: listing programs fits in this bound, and each individual time allocation sums to at most $B$. Since the budget doubles each round, all earlier budgets together sum to less than the last.
+  So the total time is $O(B)$ which is $O(T_p (x)/w_p) = O(2^abs(p) T_p (x))$, as claimed.
 ]
 
 #remark[
