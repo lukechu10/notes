@@ -1066,7 +1066,7 @@ Fix a universal interpreter and a prefix-free program encoding. Give program $p$
 
 Measure simulation and verification in steps of the fixed interpreter. Use an encoding whose eligible programs can be listed in $O(B)$ time per phase. For example, prefix a binary program body of length $k$ by $k$ ones and a zero. The resulting length is $2k+1$, so at budget $2^i$ we need only enumerate bodies of length at most $(i-1)/2$.
 
-== What universality guarantees
+== Properties of universal search
 
 #theorem[Instance-wise search bound][
   If program $p$ produces a valid witness on $x$, and $T_p (x)$ is the time to produce *and verify* it, then universal search returns a valid witness within time
@@ -1083,7 +1083,7 @@ Measure simulation and verification in steps of the fixed interpreter. Use an en
   - *Dependence on the encoding.* Each extra program bit halves its time share. The factor can be enormous, and the guarantee does not turn an exponential-time solver into a polynomial-time one.
 ]
 
-== From a share of time to a share of probability
+== Time budget to probability slice
 
 In search we do not know which solver to run. In the next appendix we do not know which generator's outputs the reduction will need. Instead of giving a program a share of *time*, give a generator a share of *probability*: a fair bit stream starts with its prefix-free code with probability $w_G=2^(-abs(G))$.
 
